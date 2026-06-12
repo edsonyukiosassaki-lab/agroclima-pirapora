@@ -233,8 +233,9 @@ def montar_html(ag, prev, ia, ps, b64):
 def publicar(html):
     auth = os.environ["WP_AUTH"].replace("﻿", "").strip()
     if not auth.lower().startswith("basic"): auth="Basic "+auth
-    r=requests.put(WP_URL, headers={"Content-Type":"application/json","Authorization":auth},
-                   data=json.dumps({"content":html}), timeout=60)
+    h={"Content-Type":"application/json","Authorization":auth,"Accept":"application/json",
+       "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 AgroClima-bot"}
+    r=requests.put(WP_URL, headers=h, data=json.dumps({"content":html}).encode("utf-8"), timeout=60)
     r.raise_for_status()
     return r.status_code
 
