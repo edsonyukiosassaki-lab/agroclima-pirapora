@@ -24,6 +24,8 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Gerar painel
         env:
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: "utf-8"
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           WP_AUTH:           ${{ secrets.WP_AUTH }}
           SUPABASE_URL:      ${{ secrets.SUPABASE_URL }}

@@ -102,8 +102,8 @@ def carregar_base():
     for cult in ["banana","uva","citros","cacau"]:
         partes=[]
         for fp in sorted(glob.glob(str(RAIZ/"base_doencas"/cult/"*.md"))):
-            partes.append(pathlib.Path(fp).read_text(encoding="utf-8"))
-        txt[cult] = "\n\n".join(partes)
+            partes.append(pathlib.Path(fp).read_text(encoding="utf-8-sig"))
+        txt[cult] = "\n\n".join(partes).replace("﻿", "")
     return txt
 
 # ---------- 4. IA (Sonnet ancorada na base) ----------
