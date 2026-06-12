@@ -1,0 +1,119 @@
+<div class="agroclima-wrap"><style>
+  .agroclima-wrap{--verde:#2d6e3e;--verde-claro:#3f9152;--amarelo:#caa00a;--vermelho:#c0392b;--bg:#f4f7f4;--card:#fff;--linha:#e3ebe3;--txt:#1f2a24;--muted:#65766b;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--txt);line-height:1.5;max-width:1080px;margin:0 auto}
+  .agroclima-wrap *{box-sizing:border-box}
+  .agroclima-wrap a{color:var(--verde)}
+  .ac-risco,.ac-cult,.ac-monit-wrap{scroll-margin-top:64px}
+  .ac-patroc{background:#fff;border:1px solid var(--linha);border-radius:14px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:16px;overflow:hidden}
+  .ac-patroc-brand{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;border-right:1px solid var(--linha);padding-right:16px}
+  .ac-patroc-brand img{height:46px}.ac-patroc-brand small{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .ac-patroc-vp{flex:1;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+  .ac-marquee{display:flex;width:max-content;animation:ac-scroll 18s linear infinite}.ac-patroc:hover .ac-marquee{animation-play-state:paused}
+  .ac-group{display:flex;align-items:center;gap:40px;padding-right:40px}
+  .ac-patroc-item{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;flex:0 0 auto}
+  .tier-fundador img{height:70px}.tier-premium img{height:66px}.tier-master img{height:58px}.tier-apoio img{height:48px}
+  .ac-cota{font-size:7.5px;font-weight:700;padding:1px 6px;border-radius:20px;white-space:nowrap}
+  .cota-origem{background:#e9f6ec;color:#1f7a3d}.cota-zenite{background:#FAEEDA;color:#854F0B}.cota-alisios{background:#E6F1FB;color:#185FA5}.cota-bromelia{background:#f3eefb;color:#6b3fa0}
+  @keyframes ac-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .ac-hero{background:linear-gradient(135deg,#2d6e3e,#3f9152);color:#fff;border-radius:16px;padding:20px;margin-bottom:12px}
+  .ac-hero h1{font-size:26px;font-weight:800}.ac-hero h1 em{font-style:normal;opacity:.85;font-weight:600}
+  .ac-sub{opacity:.9;font-size:13px;margin-top:2px}.ac-frase{margin-top:10px;font-size:13px;opacity:.95;border-left:3px solid rgba(255,255,255,.5);padding-left:10px}
+  .ac-update{margin-top:12px;font-size:12px;opacity:.9;display:flex;align-items:center;gap:7px}.ac-dot{width:8px;height:8px;border-radius:50%;background:#8ff0a4;box-shadow:0 0 0 3px rgba(143,240,164,.3)}
+  .ac-nav{position:sticky;top:0;z-index:30;background:rgba(244,247,244,.96);padding:8px 4px;margin:0 -4px 14px;display:flex;gap:7px;overflow-x:auto;border-bottom:1px solid var(--linha)}
+  .ac-nav a{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--verde);text-decoration:none;padding:9px 13px;border-radius:20px;background:#eef7f0;white-space:nowrap;min-height:40px;display:flex;align-items:center}
+  .ac-risco{border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .ac-risco.verde{background:#eef7f0;border:1px solid #c7e6cf}.ac-risco.amarelo{background:#fdf6e3;border:1px solid #f0e0a8}.ac-risco.vermelho{background:#fdeceb;border:1px solid #f3c6c2}
+  .ac-risco-nivel{font-size:21px;font-weight:800}.verde .ac-risco-nivel{color:var(--verde)}.amarelo .ac-risco-nivel{color:var(--amarelo)}.vermelho .ac-risco-nivel{color:var(--vermelho)}
+  .ac-risco-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}.ac-risco-frase{font-size:13px;max-width:640px}
+  .ac-aviso{font-size:12px;color:var(--muted);background:#fff;border:1px dashed var(--linha);border-radius:10px;padding:8px 12px;margin-bottom:12px}
+  .ac-enso{font-size:12.5px;background:#eef3fb;border:1px solid #d3e0f3;border-radius:10px;padding:10px 12px;margin-bottom:16px;color:#274b7a}.ac-enso b{cursor:pointer;display:inline-block;padding:4px 0}.ac-enso-mais{display:none;margin-top:8px;padding-top:8px;border-top:1px solid #d3e0f3}
+  .ac-sec{font-size:13px;font-weight:700;color:var(--verde);margin:18px 0 10px;text-transform:uppercase;letter-spacing:.4px}
+  .ac-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .ac-metric{background:var(--card);border:1px solid var(--linha);border-radius:12px;padding:12px}
+  .ac-metric-label{font-size:11px;color:var(--muted);font-weight:600}.ac-metric-valor{font-size:24px;font-weight:800;color:var(--verde);margin-top:2px}.ac-metric-unit{font-size:11px;color:var(--muted)}.ac-metric-acum{font-size:11.5px;margin-top:6px;border-top:1px dashed var(--linha);padding-top:6px}
+  .ac-prev{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.ac-prev-card{background:var(--card);border:1px solid var(--linha);border-radius:12px;padding:12px;text-align:center}
+  .ac-prev-dia{font-size:12px;font-weight:700;color:var(--muted)}.ac-prev-ic{font-size:24px;margin:6px 0}.ac-prev-temp .tmax{font-weight:800}.ac-prev-temp .tmin{color:var(--muted)}.ac-prev-chuva{font-size:11.5px;color:#2b6cb0;margin-top:4px}
+  .ac-flip{background:#fff7e8;border:1px solid #f0e0a8;border-radius:12px;padding:10px 14px;font-size:12.5px;color:#7a5a1f;margin-bottom:6px}
+  .ac-pressao{background:#fff;border:1px solid var(--linha);border-radius:14px;padding:14px;margin-bottom:6px}
+  .ac-pressao-cap{font-size:12px;color:var(--muted);max-width:640px}
+  .ac-pressao-bars{display:flex;gap:8px;align-items:flex-end;height:96px;margin:14px 0 6px}
+  .ac-pb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;justify-content:flex-end;height:100%}
+  .ac-pb-val{font-size:11px;font-weight:700}.ac-pb-bar{width:100%;border-radius:5px 5px 0 0;background:var(--c);min-height:4px}.ac-pb-lb{font-size:11px;color:var(--muted);font-weight:600}
+  .ac-pressao-txt{font-size:12px;color:#225c34;background:#eef7f0;border:1px solid #c7e6cf;border-radius:8px;padding:8px 10px;margin-top:8px}
+  .ac-monit{background:#fff;border:1px solid var(--linha);border-radius:14px;overflow:hidden;margin-bottom:6px}
+  .ac-monit-table{width:100%;border-collapse:collapse;font-size:12px}.ac-monit-table th,.ac-monit-table td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--linha);vertical-align:top}.ac-monit-table th{background:#f7faf7;color:var(--verde);font-size:10.5px;text-transform:uppercase}
+  .ativa{color:#1f7a3d}.vig{color:#a15c00}.ac-monit-cards{display:none}.amc{padding:10px 13px;border-bottom:1px solid var(--linha)}.amc-cult{font-weight:800;font-size:13px}.amc-row{font-size:12px;margin-top:3px}.amc-lb{font-weight:700}
+  .ac-culturas{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .ac-cult{background:var(--card);border:1px solid var(--linha);border-radius:14px;overflow:hidden}
+  .ac-cult-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--linha)}
+  .ac-cult-head.verde{background:#eef7f0}.ac-cult-head.amarelo{background:#fdf6e3}.ac-cult-head.vermelho{background:#fdeceb}
+  .ac-cult-emoji{font-size:22px}.ac-cult-nome{font-size:15px;font-weight:800;flex:1}.ac-cult-tag{font-size:10px;font-weight:800;padding:2px 9px;border-radius:20px;text-transform:uppercase}
+  .verde .ac-cult-tag{background:var(--verde);color:#fff}.amarelo .ac-cult-tag{background:var(--amarelo);color:#fff}.vermelho .ac-cult-tag{background:var(--vermelho);color:#fff}
+  .ac-cult-body{padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+  .ac-item{display:flex;gap:8px;font-size:12.5px;align-items:flex-start}.ac-item .ic{flex:0 0 18px}.ac-item.nova{background:#f7faf7;border:1px solid var(--linha);border-radius:8px;padding:8px}
+  .ac-item.doenca .ic{color:#a15c00}.ac-item.praga .ic{color:#7a5a1f}.ac-item.nutri .ic{color:#1f7a3d}.ac-protecao{font-size:11.5px;color:var(--muted);border-top:1px dashed var(--linha);padding-top:7px}
+  .ac-cult-det{display:flex;flex-direction:column;gap:9px}.ac-cult-toggle{display:none;background:#f7faf7;border:1px solid var(--linha);border-radius:8px;color:var(--verde);font-weight:700;font-size:12.5px;padding:10px;cursor:pointer;min-height:42px;width:100%;text-align:center}
+  .ac-acc{background:#fff;border:1px solid var(--linha);border-radius:12px;margin-top:12px;overflow:hidden}.ac-acc-h{padding:13px 14px;font-weight:700;font-size:13px;color:var(--verde);cursor:pointer;display:flex;justify-content:space-between;min-height:46px;align-items:center}.ac-acc-b{display:none;padding:0 14px 14px;font-size:12px;line-height:1.6}.ac-gloss-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ac-gloss-item strong{color:var(--verde)}.ac-met p{margin-bottom:8px}
+  .ac-rodape{margin-top:20px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6}
+  @media (max-width:760px){.ac-metrics{grid-template-columns:repeat(2,1fr)}.ac-prev{grid-template-columns:repeat(3,1fr)}.ac-culturas{grid-template-columns:1fr}.ac-gloss-grid{grid-template-columns:1fr}.ac-hero h1{font-size:22px}.ac-patroc{flex-direction:column;align-items:stretch;gap:8px}.ac-patroc-brand{flex-direction:row;border-right:none;border-bottom:1px solid var(--linha);padding-right:0;padding-bottom:8px;justify-content:center;gap:8px}.ac-patroc-brand img{height:38px}.ac-monit-table{display:none}.ac-monit-cards{display:block}.ac-cult-toggle{display:block}.ac-cult-det{display:none}.ac-cult-det.open{display:flex}}
+</style>
+
+«FAIXA»
+
+<div class="ac-hero"><h1>AgroClima <em>Pirapora</em></h1><p class="ac-sub">Inteligência climática para a fruticultura irrigada do Norte de MG</p><p class="ac-frase">Monitorar o risco climático não elimina a incerteza. Reduz a surpresa.</p><div class="ac-update"><span class="ac-dot"></span><span>Atualizado em: «DATA» · Próxima atualização: 06h00</span></div></div>
+
+<nav class="ac-nav"><a href="#hoje">📍 Hoje</a><a href="#monit">🛡️ Monitorado</a><a href="#banana">🍌 Banana</a><a href="#uva">🍇 Uva</a><a href="#citros">🍊 Citros</a><a href="#cacau">🍫 Cacau</a></nav>
+
+<div class="ac-risco «RISCO_CLASSE»" id="hoje"><div><span class="ac-risco-label">Risco agroclimático do dia</span><span class="ac-risco-nivel">«RISCO_NIVEL»</span></div><div class="ac-risco-frase">«RISCO_FRASE»</div></div>
+
+<div class="ac-aviso">⚙ Alertas gerados por IA (Claude Sonnet 4.6), ancorados em base de doenças/pragas referenciada (Embrapa · Fundecitrus · CEPLAC · ESALQ/USP). Sinal de atenção, não diagnóstico.</div>
+
+<div class="ac-enso"><b onclick="acT('enso')">⚠ ENSO — El Niño (previsto) · o que é? ▾</b><div class="ac-enso-mais" id="enso">ENSO (El Niño–Oscilação Sul) altera chuva e temperatura no Brasil por meses. <strong>El Niño</strong> aquece o ar, reduz chuvas no cerrado e eleva o VPD — como em 2023, quando a banana prata em Pirapora caiu ~50%. <em>2026: El Niño previsto (62–80%) para jun–dez (NOAA/CPC).</em></div></div>
+
+<div class="ac-sec">Dados climáticos de ontem — estação INMET A545 (real)</div>
+<div class="ac-metrics">«METRICAS»</div>
+
+<div class="ac-sec">Previsão operacional — próximos 5 dias (Open-Meteo)</div>
+<div class="ac-prev">«PREVISAO»</div>
+
+<div class="ac-flip">🔁 Os fungos de mancha sobem no <strong>úmido/molhamento</strong>; <strong>ácaros, tripes e vetores</strong> sobem no <strong>quente/seco</strong>. O painel troca o tipo de alerta conforme o clima — nunca fica "tudo verde".</div>
+
+<div class="ac-sec">Pressão acumulada de manchas no fruto — banana</div>
+<div class="ac-pressao"><div class="ac-pressao-cap">Molhamento foliar por mês (dias com UR≥80%) — o que alimenta os fungos de mancha (mal de Sigatoka, mancha-diamante/Pyricularia, Deightoniella, Cordana). Últimos 30 dias: «CHUVA30» mm de chuva em «DIASCHUVA» dias.</div><div class="ac-pressao-bars">«PRESSAO»</div><div class="ac-pressao-txt">🦠 As manchas no fruto resultam do <strong>acúmulo</strong> de molhamento ao longo de semanas, não de um dia. Barras vermelhas = meses úmidos que constroem a pressão; verdes = meses secos em que ela cai.</div></div>
+
+<div class="ac-sec" id="monit">Doenças e pragas monitoradas na região</div>
+<div style="font-size:11px;color:#65766b;margin:-4px 0 8px">"Vigilância" = monitorado preventivamente; presença não confirmada na região.</div>
+<div class="ac-monit ac-monit-wrap">
+<table class="ac-monit-table"><tr><th>Cultura</th><th>Com alerta ativo</th><th>Vigilância / ausente</th></tr>
+<tr><td>🍌 Banana</td><td class="ativa">Mal de Sigatoka · mancha-diamante (Pyricularia) · Deightoniella · Cordana · antracnose · tripes</td><td>—</td></tr>
+<tr><td>🍇 Uva</td><td class="ativa">Míldio · oídio · antracnose · Botrytis · ácaros · tripes</td><td class="vig">Vírus do enrolamento / cochonilha (presença não confirmada)</td></tr>
+<tr><td>🍊 Citros</td><td class="ativa">Mancha-marrom-de-alternaria · ácaro-da-ferrugem</td><td class="vig">Cancro · pinta-preta (região livre) · greening · leprose (presença não confirmada)</td></tr>
+<tr><td>🍫 Cacau</td><td class="ativa">Vassoura-de-bruxa · podridão-parda · Monalonion</td><td class="vig">Mal-do-facão (presença não confirmada)</td></tr></table>
+<div class="ac-monit-cards">
+<div class="amc"><div class="amc-cult">🍌 Banana</div><div class="amc-row"><span class="amc-lb ativa">Alerta:</span> mal de Sigatoka, mancha-diamante, Deightoniella, Cordana, antracnose, tripes</div></div>
+<div class="amc"><div class="amc-cult">🍇 Uva</div><div class="amc-row"><span class="amc-lb ativa">Alerta:</span> míldio, oídio, antracnose, Botrytis, ácaros, tripes</div><div class="amc-row"><span class="amc-lb vig">Vigilância:</span> enrolamento/cochonilha</div></div>
+<div class="amc"><div class="amc-cult">🍊 Citros</div><div class="amc-row"><span class="amc-lb ativa">Alerta:</span> mancha-marrom-de-alternaria, ácaro-da-ferrugem</div><div class="amc-row"><span class="amc-lb vig">Vigilância:</span> cancro, pinta-preta (região livre), greening, leprose</div></div>
+<div class="amc"><div class="amc-cult">🍫 Cacau</div><div class="amc-row"><span class="amc-lb ativa">Alerta:</span> vassoura-de-bruxa, podridão-parda, Monalonion</div><div class="amc-row"><span class="amc-lb vig">Vigilância:</span> mal-do-facão</div></div>
+</div></div>
+
+<div class="ac-sec">Acompanhamento por cultura <span style="color:#65766b;font-weight:600;text-transform:none">(IA Sonnet 4.6 · uva/citros/cacau = culturas da região)</span></div>
+<div class="ac-culturas">«CULTURAS»</div>
+
+<div class="ac-acc"><div class="ac-acc-h" onclick="acT('gloss')">📖 Glossário climático<span>mostrar ▾</span></div><div class="ac-acc-b" id="gloss"><div class="ac-gloss-grid">
+<div class="ac-gloss-item"><strong>ET₀</strong><p>mm de água perdidos para o ar por dia. Base da irrigação.</p></div>
+<div class="ac-gloss-item"><strong>VPD</strong><p>O quanto o ar está "com sede". Baixo+frio favorece molhamento e fungos.</p></div>
+<div class="ac-gloss-item"><strong>Molhamento foliar / orvalho</strong><p>Horas com folha/fruto molhados — gatilho dos fungos de mancha.</p></div>
+<div class="ac-gloss-item"><strong>Vetor</strong><p>Inseto/ácaro que transmite uma doença (ex.: psilídeo→greening, cochonilha→enrolamento).</p></div>
+</div></div></div>
+
+<div class="ac-acc"><div class="ac-acc-h" onclick="acT('met')">⚙ Como este painel funciona — fontes e metodologia<span>mostrar ▾</span></div><div class="ac-acc-b ac-met" id="met">
+<p><strong>Dados observados:</strong> estação real <strong>INMET A545 (Pirapora-MG)</strong>, agregada por dia (ET₀ FAO-56, VPD, temperatura, umidade, radiação, vento, chuva) — os mesmos do sistema da fazenda.</p>
+<p><strong>Previsão (5 dias):</strong> Open-Meteo.</p>
+<p><strong>Base de doenças/pragas:</strong> fichas referenciadas por cultura (Embrapa, Fundecitrus, Inst. Biológico-SP, CEPLAC, SciELO, APS). A IA <strong>só cita o que está na base</strong>.</p>
+<p><strong>IA:</strong> Claude Sonnet 4.6 · sinal de atenção, não diagnóstico.</p>
+<p><strong>Automação:</strong> GitHub Actions → INMET + Open-Meteo → IA → publicação diária 06h00.</p>
+<p><strong>Curadoria:</strong> Edson Sassaki · Eng. Agrônomo.</p></div></div>
+
+<div class="ac-rodape"><p>Observado: INMET A545 · Previsão: Open-Meteo · ENSO: NOAA/CPC · Base: Embrapa, Fundecitrus, CEPLAC, Inst. Biológico, ESALQ/USP · IA: Claude Sonnet 4.6</p><p>⚠ Uso informativo — não substitui laudos técnicos agronômicos. Consulte seu engenheiro agrônomo.</p><p>Curadoria: Edson Sassaki · Eng. Agrônomo · sassakiagronegocios.com.br</p></div>
+
+<script>function acT(id){var e=document.getElementById(id);if(e)e.style.display=e.style.display==='block'?'none':'block';}function det(b){var d=b.nextElementSibling;var o=d.classList.toggle('open');b.textContent=o?'ocultar detalhes ▴':'ver detalhes ▾';}</script>
+</div>
