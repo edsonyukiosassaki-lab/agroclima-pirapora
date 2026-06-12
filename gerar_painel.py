@@ -231,7 +231,7 @@ def montar_html(ag, prev, ia, ps, b64):
 
 # ---------- 7. PUBLICAR ----------
 def publicar(html):
-    auth = os.environ["WP_AUTH"]
+    auth = os.environ["WP_AUTH"].replace("﻿", "").strip()
     if not auth.lower().startswith("basic"): auth="Basic "+auth
     r=requests.put(WP_URL, headers={"Content-Type":"application/json","Authorization":auth},
                    data=json.dumps({"content":html}), timeout=60)
