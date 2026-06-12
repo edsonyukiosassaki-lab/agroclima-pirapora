@@ -30,6 +30,11 @@ def f(v):
     try: return float(str(v).replace(",", ".")) if str(v).strip() not in ("","-","nan","None") else None
     except: return None
 
+def br(v, c=1):
+    if v is None: return "—"
+    try: return f"{round(float(v), c):.{c}f}".replace(".", ",")
+    except: return str(v)
+
 # ---------- 1. CLIMA (estacao real INMET, via Supabase — somente leitura) ----------
 SUPA_URL = os.environ.get("SUPABASE_URL", "https://fxkdjzguyxtbfadmoemg.supabase.co")
 SUPA_KEY = os.environ.get("SUPABASE_KEY", "")
@@ -205,10 +210,10 @@ def card_cultura(c):
 def montar_html(ag, prev, ia, ps, b64):
     o=ag["ontem"]
     nivel_classe={"OK":"verde","ATENÇÃO":"amarelo","ESTRESSE":"vermelho","ESTRESSE SEVERO":"vermelho"}[ia["risco_nivel"]]
-    metr=[("ET₀ ontem",o["et0"],"mm/dia",f"7d: <strong>{ag['et0_7d']}</strong> · 30d: <strong>{ag['et0_30d']}</strong> mm"),
-          ("VPD ontem",o["vpd"],"kPa",f"Média 7d: <strong>{ag['vpd_7d']}</strong>"),
-          ("Temperatura",f"{o['tmax']}° {o['tmin']}°","máx / mín °C",f"Status: <strong>{o['status'] or '—'}</strong>"),
-          ("Radiação",o["rad"],"MJ/m²/dia","Estação INMET A545"),
+    metr=[("ET₀ ontem",br(o["et0"],2),"mm/dia",f"7d: <strong>{br(ag['et0_7d'])}</strong> · 30d: <strong>{br(ag['et0_30d'])}</strong> mm"),
+          ("VPD ontem",br(o["vpd"],2),"kPa",f"Média 7d: <strong>{br(ag['vpd_7d'],2)}</strong>"),
+          ("Temperatura",f"{br(o['tmax'])}° {br(o['tmin'])}°","máx / mín °C",f"Status: <strong>{o['status'] or '—'}</strong>"),
+          ("Radiação",br(o["rad"],1),"MJ/m²/dia","Estação INMET A545"),
           ("Vento",round((o["vento"] or 0)*3.6),"km/h","médio do dia")]
     mh="".join(f'<div class="ac-metric"><div class="ac-metric-label">{n}</div><div class="ac-metric-valor" style="font-size:20px">{v}</div><div class="ac-metric-unit">{u}</div><div class="ac-metric-acum">{a}</div></div>' for n,v,u,a in metr)
     ph="".join(f'<div class="ac-prev-card"><div class="ac-prev-dia">{p["label"]}</div><div class="ac-prev-ic">{p["ic"]}</div><div class="ac-prev-temp"><span class="tmax">{p["tmax"]}°</span> <span class="tmin">{p["tmin"]}°</span></div><div class="ac-prev-chuva">{p["chuva"]}% chuva</div></div>' for p in prev) or '<div style="color:#65766b">previsão indisponível</div>'
@@ -220,7 +225,7 @@ def montar_html(ag, prev, ia, ps, b64):
     rep={"«FAIXA»":faixa_patrocinadores(ps,b64),"«DATA»":ag["data_br"],
          "«RISCO_CLASSE»":nivel_classe,"«RISCO_NIVEL»":ia["risco_nivel"],"«RISCO_FRASE»":ia["risco_frase"],
          "«METRICAS»":mh,"«PREVISAO»":ph,"«PRESSAO»":pb,"«CULTURAS»":cards,
-         "«CHUVA30»":str(ag["chuva_30d"]),"«DIASCHUVA»":str(ag["dias_chuva_30d"])}
+         "«CHUVA30»":br(ag["chuva_30d"]),"«DIASCHUVA»":str(ag["dias_chuva_30d"])}
     for k,v in rep.items(): tpl=tpl.replace(k,str(v))
     return tpl
 
