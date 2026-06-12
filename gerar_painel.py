@@ -201,7 +201,7 @@ def card_cultura(c):
         f'<span class="ac-cult-emoji">{EMOJI[c["cultura"]]}</span><span class="ac-cult-nome">{NOMES[c["cultura"]]}</span>'
         f'<span class="ac-cult-tag">{TAG[cl]}</span></div><div class="ac-cult-body">'
         f'<div class="ac-item"><span class="ic">⚠</span><span><strong>Acompanhar:</strong> {c["acompanhar"]}</span></div>'
-        f'<button class="ac-cult-toggle" onclick="det(this)">ver detalhes ▾</button><div class="ac-cult-det">'
+        f'<button class="ac-cult-toggle" id="btn-{c[`"cultura`"]}" onclick="det(\'{c[`"cultura`"]}\')">ver detalhes ▾</button><div class="ac-cult-det" id="det-{c[`"cultura`"]}">'
         f'<div class="ac-item nova doenca"><span class="ic">🦠</span><span><strong>Doenças:</strong> {c["doencas"]}</span></div>'
         f'<div class="ac-item nova praga"><span class="ic">🐛</span><span><strong>Pragas:</strong> {c["pragas"]}</span></div>'
         f'<div class="ac-item nova nutri"><span class="ic">🧪</span><span><strong>Nutrição:</strong> {c["nutricao"]}</span></div>'
