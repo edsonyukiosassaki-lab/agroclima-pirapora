@@ -1,0 +1,4 @@
+[
+  {"ativo": true, "ordem": 1, "nome": "ASP Agro",            "cota": "premium", "nome_cota": "zenite",  "logo": "zenite.png",   "link": "#"},
+  {"ativo": true, "ordem": 2, "nome": "Sistemig Irrigação",  "cota": "master",  "nome_cota": "alisios", "logo": "sistemig.png", "link": "#"}
+]

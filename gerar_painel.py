@@ -30,31 +30,24 @@ def f(v):
     try: return float(str(v).replace(",", ".")) if str(v).strip() not in ("","-","nan","None") else None
     except: return None
 
-# ---------- 1. CLIMA (estacao real, via planilha) ----------
-def sheets():
-    from google.oauth2.service_account import Credentials
-    import gspread
-    creds = Credentials.from_service_account_file("credentials.json",
-            scopes=["https://www.googleapis.com/auth/spreadsheets"])
-    return gspread.authorize(creds).open_by_key(SHEET_ID)
+# ---------- 1. CLIMA (estacao real INMET, via Supabase — somente leitura) ----------
+SUPA_URL = os.environ.get("SUPABASE_URL", "https://fxkdjzguyxtbfadmoemg.supabase.co")
+SUPA_KEY = os.environ.get("SUPABASE_KEY", "")
 
-def ler_clima(sh):
-    rows = sh.worksheet(ABA_CLIMA).get_all_values()
-    head = rows[0]
-    idx = {c: i for i, c in enumerate(head)}
-    def col(r, name):
-        i = idx.get(name); return f(r[i]) if i is not None and i < len(r) else None
+def ler_clima():
+    cols = "data,et0_mm,vpd_kpa,temp_max_c,temp_min_c,umidade_relativa_pct,radiacao_solar_mj,vento_ms,precipitacao_mm,status"
+    url = f"{SUPA_URL}/rest/v1/clima?select={cols}&order=data.desc&limit=400"
+    r = requests.get(url, headers={"apikey": SUPA_KEY, "Authorization": f"Bearer {SUPA_KEY}"}, timeout=30)
+    r.raise_for_status()
     dados = []
-    for r in rows[1:]:
-        d = r[idx["data"]].strip() if idx.get("data") is not None else ""
-        if len(d) < 8: continue
-        try: dt = datetime.date.fromisoformat(d[:10])
+    for x in r.json():
+        try: dt = datetime.date.fromisoformat(str(x["data"])[:10])
         except: continue
-        dados.append({"data": dt,
-            "et0": col(r,"et0_mm"), "vpd": col(r,"vpd_kpa"), "tmax": col(r,"t_max"),
-            "tmin": col(r,"t_min"), "ur": col(r,"ur_pct"), "rad": col(r,"rad_mj"),
-            "vento": col(r,"vento_ms"), "chuva": col(r,"chuva_mm"), "status": (r[idx["status"]] if idx.get("status") is not None and idx["status"]<len(r) else "")})
-    dados.sort(key=lambda x: x["data"])
+        dados.append({"data": dt, "et0": f(x.get("et0_mm")), "vpd": f(x.get("vpd_kpa")),
+            "tmax": f(x.get("temp_max_c")), "tmin": f(x.get("temp_min_c")), "ur": f(x.get("umidade_relativa_pct")),
+            "rad": f(x.get("radiacao_solar_mj")), "vento": f(x.get("vento_ms")), "chuva": f(x.get("precipitacao_mm")),
+            "status": x.get("status") or ""})
+    dados.sort(key=lambda d: d["data"])
     return dados
 
 def soma(seq): seq=[x for x in seq if x is not None]; return round(sum(seq),1) if seq else 0.0
@@ -156,19 +149,19 @@ def analisar(ag, base):
 # ---------- 5. PATROCINADORES ----------
 COTA_CLASSE = {"zenite":"cota-zenite","alisios":"cota-alisios","origem":"cota-origem","bromelia":"cota-bromelia"}
 TIER = {"fundador":"tier-fundador","premium":"tier-premium","master":"tier-master","apoio":"tier-apoio"}
-def ler_patrocinadores(sh):
-    try:
-        rows = sh.worksheet(ABA_PATRO).get_all_records()
-    except Exception:
-        return []
-    ps=[]
-    for r in rows:
-        if str(r.get("Ativo","")).strip().lower() in ("não","nao","n","false","0",""): continue
-        ps.append({"nome":r.get("Nome",""),"cota":str(r.get("Cota","")).strip(),
-                   "nome_cota":str(r.get("Nome_cota","")).strip(),"logo":r.get("Logo",""),
-                   "link":r.get("Link","#"),"ordem":f(r.get("Ordem")) or 99})
-    ps.sort(key=lambda x:x["ordem"])
+def ler_patrocinadores():
+    fp = RAIZ/"patrocinadores.json"
+    if not fp.exists(): return []
+    try: rows = json.loads(fp.read_text(encoding="utf-8"))
+    except Exception: return []
+    ps = [r for r in rows if str(r.get("ativo", True)).lower() not in ("false","0","nao","não")]
+    ps.sort(key=lambda x: x.get("ordem", 99))
     return ps
+
+def b64file(fn):
+    if not fn: return ""
+    p = RAIZ/"logos"/fn
+    return "data:image/png;base64,"+base64.b64encode(p.read_bytes()).decode() if p.exists() else ""
 
 def faixa_patrocinadores(ps, b64):
     if not ps:
@@ -176,11 +169,12 @@ def faixa_patrocinadores(ps, b64):
     else:
         itens=[]
         for p in ps:
-            tier=TIER.get(p["cota"].lower(),"tier-master")
-            cc=COTA_CLASSE.get(p["nome_cota"].lower(),"cota-alisios")
-            sel = (p["cota"].capitalize()+" · "+p["nome_cota"].capitalize()) if p["nome_cota"] else p["cota"].capitalize()
-            itens.append(f'<a class="ac-patroc-item {tier}" href="{p["link"]}" target="_blank">'
-                         f'<img src="{p["logo"]}" alt="{p["nome"]}"><span class="ac-cota {cc}">{sel}</span></a>')
+            cota=str(p.get("cota","")); nc=str(p.get("nome_cota",""))
+            tier=TIER.get(cota.lower(),"tier-master")
+            cc=COTA_CLASSE.get(nc.lower(),"cota-alisios")
+            sel=(cota.capitalize()+" · "+nc.capitalize()) if nc else cota.capitalize()
+            itens.append(f'<a class="ac-patroc-item {tier}" href="{p.get("link","#")}" target="_blank">'
+                         f'<img src="{b64file(p.get("logo",""))}" alt="{p.get("nome","")}"><span class="ac-cota {cc}">{sel}</span></a>')
         grupo = "".join(itens)
     g = f'<div class="ac-group">{grupo}</div>'
     return (f'<div class="ac-patroc"><div class="ac-patroc-brand"><img src="{b64["sassaki"]}" alt="Sassaki">'
@@ -254,8 +248,7 @@ def abrir_issue(titulo, corpo):
 # ---------- MAIN ----------
 def main():
     log(f"Modo: {'DRY-RUN' if DRY else 'PUBLICAR'}")
-    sh=sheets()
-    dados=ler_clima(sh)
+    dados=ler_clima()
     ag=agregar(dados)
     log(f"Clima ok — ontem {ag['data_br']} (ET0 {ag['ontem']['et0']})")
     # checagem de frescor: dado de ontem deve ser recente
@@ -266,7 +259,7 @@ def main():
     prev=previsao(); log(f"Previsão: {len(prev)} dias")
     base=carregar_base()
     ia=analisar(ag,base); log(f"IA: risco {ia['risco_nivel']}, {len(ia['culturas'])} culturas")
-    ps=ler_patrocinadores(sh); log(f"Patrocinadores: {len(ps)}")
+    ps=ler_patrocinadores(); log(f"Patrocinadores: {len(ps)}")
     b64={"sassaki":b64logo("sassaki")}
     html=montar_html(ag,prev,ia,ps,b64)
     out=RAIZ/"saida"; out.mkdir(exist_ok=True)
