@@ -4,7 +4,7 @@ nome_comum: Tripes (da ferrugem e da erupção) — mancha na casca
 agente: Chaetanaphothrips signipennis (tripes-da-ferrugem) · Frankliniella spp. (tripes-da-erupção)
 tipo: praga (dano na casca do fruto)
 driver: climatico (quente / seco)
-status_validacao: PENDENTE
+status_validacao: VALIDADO (curador, 16/Jun/2026)
 ---
 
 # Tripes — mancha/ferrugem na casca do fruto
@@ -33,10 +33,8 @@ status_validacao: PENDENTE
 - **Controle de plantas hospedeiras** (*Commelina* sp., *Brachiaria*).
 - Controle químico conforme recomendação técnica e Agrofit/MAPA, quando necessário.
 
-## ⚠ REVISAR (curador)
-- O que você vê na sua lavoura é mais **ferrugem (manchas marrom-avermelhadas/rachaduras)** ou **erupção (pontos escuros ásperos)**?
-- Em que época costuma aparecer mais (confirma o pico quente)?
-- Você já usa ensacamento? Isso muda o peso do alerta.
+## Validação do curador (16/Jun/2026)
+- Ocorrem **as duas** (ferrugem e erupção). A **tripes-da-ferrugem** (*Chaetanaphothrips*) é a que **mais deprecia a aparência** da banana → **priorizar** no alerta de período quente-seco.
 
 ## Referências
 - Embrapa — Pragas da bananeira (Agência de Informação Tecnológica): https://www.embrapa.br/en/agencia-de-informacao-tecnologica/cultivos/banana/producao/pragas/pragas

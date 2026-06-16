@@ -4,7 +4,7 @@ nome_comum: Mancha de Cordana
 patogeno: Cordana musae
 tipo: foliar
 driver: climatico
-status_validacao: PENDENTE
+status_validacao: VALIDADO (curador, 16/Jun/2026)
 ---
 
 # Mancha de Cordana
@@ -27,8 +27,8 @@ Doença foliar considerada **secundária**, mas que ganha importância sob molha
 - Desfolha sanitária, equilíbrio nutricional e boa ventilação.
 - Geralmente não exige controle químico específico quando a Sigatoka já é manejada.
 
-## ⚠ REVISAR (curador)
-- Confirmar relevância prática em Pirapora (frequência/severidade observada).
+## Validação do curador (16/Jun/2026)
+- **Relevante, porém secundária.** Importa **principalmente nas folhas**, onde a **pulverização não atinge** bem. Manter como doença complementar à Sigatoka no bloco de manchas foliares.
 
 ## Referências
 - Embrapa — Principais doenças da bananeira (Mancha de Cordana): https://www.embrapa.br/en/agencia-de-informacao-tecnologica/cultivos/banana/producao/pragas/doencas/fungicas/principais-doencas

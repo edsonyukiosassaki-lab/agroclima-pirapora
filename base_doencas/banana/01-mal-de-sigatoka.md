@@ -4,7 +4,7 @@ nome_comum: Mal de Sigatoka (amarela e negra)
 patogeno: Mycosphaerella musicola (amarela) · Mycosphaerella fijiensis (negra)
 tipo: foliar
 driver: climatico
-status_validacao: PENDENTE
+status_validacao: VALIDADO (curador, 16/Jun/2026)
 ---
 
 # Mal de Sigatoka (amarela e negra)
@@ -31,9 +31,9 @@ status_validacao: PENDENTE
 - Monitoramento no período chuvoso; programa de fungicidas conforme recomendação técnica e Agrofit/MAPA.
 - Cultivares com resistência quando disponíveis.
 
-## ⚠ REVISAR (curador)
-- Faixas de temperatura/horas de molhamento ok para a sua realidade em Pirapora?
-- Quer limiar específico de horas de orvalho para disparar "amarelo" e "vermelho"?
+## Validação do curador (16/Jun/2026)
+- Faixas de temperatura/molhamento **OK** para Pirapora.
+- Curador **quer limiares de horas de molhamento (UR≥90%)** para disparar **amarelo/vermelho** — a definir com base na **climatologia real** (média histórica: verão 5+ h/dia, seca ~0; ver seção de pressão).
 
 ## Referências
 - Embrapa — Sigatokas (Agência de Informação Tecnológica da banana): https://www.embrapa.br/en/agencia-de-informacao-tecnologica/cultivos/banana/producao/pragas/doencas/fungicas/principais-doencas/sigatokas

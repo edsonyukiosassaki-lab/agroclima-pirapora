@@ -4,7 +4,7 @@ nome_comum: Antracnose da banana
 patogeno: Colletotrichum musae
 tipo: fruto (pós-colheita)
 driver: climatico
-status_validacao: PENDENTE
+status_validacao: VALIDADO (curador, 16/Jun/2026)
 ---
 
 # Antracnose (Colletotrichum musae)
@@ -26,8 +26,8 @@ Principal doença de **pós-colheita** do fruto, com **infecção latente** aind
 - Reduzir ferimentos na colheita e transporte; higiene de packing house; resfriamento.
 - Tratamentos pós-colheita conforme recomendação técnica e Agrofit/MAPA.
 
-## ⚠ REVISAR (curador)
-- Relevante para a sua cadeia (mercado/transporte) ou foco apenas em mancha de campo?
+## Validação do curador (16/Jun/2026)
+- **Operacionalmente pouco relevante** para a realidade atual (foco em mancha de **campo**, não na cadeia de pós-colheita/transporte). Manter como referência, **peso baixo** no alerta.
 
 ## Referências
 - Embrapa/ALICE — Doenças pós-colheita de frutas (banana): https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/653130/1/ia-228-doencas-pos-colheita-de-frutas-16-20.pdf

@@ -3,10 +3,14 @@
 Fichas estruturadas e referenciadas que **ancoram a IA** do painel.
 **Regra de ouro:** a IA só pode citar/alertar doença que tenha ficha aqui, com referência reconhecida. Nada de "lembrar de cabeça".
 
-## Status: 🟢 BASE INICIAL ACEITA — Edson Sassaki (Eng. Agrônomo) · 12/Jun/2026
-Aceita como **base de partida** para a banana. Os marcadores **⚠ REVISAR** seguem abertos para
-**refinamento contínuo** (ajuste fino de limiares e sintomas observados em campo).
-Cada ficha mantém `status_validacao: PENDENTE` até o refino de cada ⚠.
+## Status: 🟢 BASE VALIDADA — Edson Sassaki (Eng. Agrônomo) · 16/Jun/2026
+Base de partida aceita em 12/Jun e **validada em campo em 16/Jun** (todas as 6 fichas com
+`status_validacao: VALIDADO`). Prioridades de campo do curador:
+- **Alta:** mancha-diamante (Pyricularia) e Deightoniella — **manchas escuras na casca, aumentaram muito em 2026**; alerta deve ser **preventivo** (~60–70 dias, na formação do cacho).
+- **Tripes-da-ferrugem:** a que mais deprecia a aparência (alerta no quente-seco).
+- **Cordana:** secundária, foco nas folhas (onde a pulverização não atinge).
+- **Antracnose:** peso baixo (pós-colheita pouco relevante no operacional).
+- **Sigatoka:** definir limiares amarelo/vermelho por **horas de molhamento (UR≥90%)**, ancorados na climatologia real (11 anos).
 
 ## Esquema de cada ficha
 `cultura · nome_comum · patogeno · tipo (foliar/fruto/vascular) · driver (climatico/solo/bacteriano) · condições favoráveis (quantificadas) · gatilho para o painel · sintomas · manejo · referências`

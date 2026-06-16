@@ -4,7 +4,7 @@ nome_comum: Pinta-de-Deightoniella ("speckle")
 patogeno: Deightoniella torulosa
 tipo: fruto (e folha/engaço)
 driver: climatico
-status_validacao: PENDENTE
+status_validacao: VALIDADO (curador, 16/Jun/2026)
 ---
 
 # Pinta-de-Deightoniella ("speckle" / mancha da casca)
@@ -27,8 +27,8 @@ Causa **pontos/manchas na casca** do fruto. O fungo é **habitante frequente de 
 - **Remoção de folhas e flores secas** (reduz o inóculo) e do "coração"/restos florais; ensacamento do cacho.
 - Boa ventilação e drenagem; cuidados de pós-colheita.
 
-## ⚠ REVISAR (curador)
-- As manchas que você viu eram **pequenas com halo verde** (Deightoniella) ou **maiores deprimidas ~5 mm** (Pyricularia)? Ajuda a calibrar o alerta.
+## Validação do curador (16/Jun/2026)
+- **Confirmado:** manchas **escuras na casca**. **Aumentou muito este ano**, junto com a mancha-diamante (Pyricularia). **Prioridade alta de monitoramento** no bloco de manchas do fruto.
 
 ## Referências
 - Embrapa — Doenças secundárias da bananeira: https://www.embrapa.br/en/agencia-de-informacao-tecnologica/cultivos/banana/producao/pragas/doencas/fungicas/doencas-secundarias

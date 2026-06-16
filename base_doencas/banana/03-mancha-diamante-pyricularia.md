@@ -4,7 +4,7 @@ nome_comum: Mancha-diamante / Lesão-de-Johnston (Pinta-de-Pyricularia)
 patogeno: Pyricularia grisea (sin. Magnaporthe grisea)
 tipo: fruto (e folha)
 driver: climatico
-status_validacao: PENDENTE
+status_validacao: VALIDADO (curador, 16/Jun/2026)
 ---
 
 # Mancha-diamante / Lesão-de-Johnston (mancha do fruto)
@@ -27,9 +27,9 @@ Apontada na literatura como **o fungo mais importante causando mancha em frutos 
 - **Sanidade do bananal** (remoção de folhas/flores secas que abrigam o inóculo).
 - Ensacamento do cacho e boa ventilação; manejo de molhamento (drenagem, irrigação que não molhe o cacho).
 
-## ⚠ REVISAR (curador)
-- **Esta é a "mancha-diamante" que você observou este ano?** (confirmar o nome que você usa e se bate com a Pyricularia/Johnston).
-- Janela de 60–70 dias confere com a sua fenologia de cacho?
+## Validação do curador (16/Jun/2026)
+- **Confirmado:** é a "mancha-diamante" observada este ano. A **janela de 60–70 dias bate** com a fenologia do cacho.
+- **Expectativa explícita do curador:** o monitoramento climático deve **avisar PREVENTIVAMENTE** (alerta ~60–70 dias antes, olhando o molhamento durante a formação/enchimento do cacho). **Prioridade alta.**
 
 ## Referências
 - SciELO — *Pyricularia grisea* causando lesões em folhas de bananeira: https://www.scielo.br/j/fb/a/rcmqYg3yTGMzn6TPMkSLXPg/?lang=pt
