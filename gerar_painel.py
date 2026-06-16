@@ -16,6 +16,7 @@ SHEET_ID   = "1oaqeRuwsQ7xTpM4CWv2PqC7GlTPHRCZGD5882IveCM4"   # AgroClima (BD_cl
 ABA_CLIMA  = "BD_clima_auto"
 ABA_PATRO  = "patrocinadores"
 WP_URL     = "https://sassakiagronegocios.com.br/wp-json/wp/v2/pages/1649"
+WP_TEMPLATE = "templates/tpl-helper-min-pb.php"   # canvas limpo (sem cabeçalho/sidebar/título), mesmo da home 1786 e artigos 1795 — setado a cada publish p/ não exigir config manual
 LAT, LON   = -17.35, -44.91
 MODELO_IA  = "claude-sonnet-4-6"
 RAIZ       = pathlib.Path(__file__).parent
@@ -263,7 +264,7 @@ def publicar(html):
     if not auth.lower().startswith("basic"): auth="Basic "+auth
     h={"Content-Type":"application/json","Authorization":auth,"Accept":"application/json",
        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 AgroClima-bot"}
-    r=requests.put(WP_URL, headers=h, data=json.dumps({"content":html}).encode("utf-8"), timeout=60)
+    r=requests.put(WP_URL, headers=h, data=json.dumps({"content":html,"template":WP_TEMPLATE}).encode("utf-8"), timeout=60)
     r.raise_for_status()
     return r.status_code
 
