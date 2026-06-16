@@ -24,6 +24,33 @@ DRY        = "--dry-run" in sys.argv or "--publicar" not in sys.argv
 MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"]
 DIAS  = ["seg","ter","qua","qui","sex","sáb","dom"]
 
+# Faixas de VPD para calibrar a leitura da IA (impedir chamar VPD baixo de "elevado").
+# IMPORTANTE: o VPD do painel é MÉDIA DIÁRIA do ar (estação INMET A545), não o pico de
+# meio-dia; por isso as faixas abaixo são mais baixas que os limiares instantâneos
+# folha-ar dos estudos. Os limiares fisiológicos citados são leaf-to-air (instantâneos),
+# então uma média diária já cruzando 1,0-1,5 kPa implica picos de meio-dia estressantes.
+# Referências:
+#  - Grossiord, C., Buckley, T.N., Cernusak, L.A., Novick, K.A., Poulter, B.,
+#    Siegwolf, R.T.W., Sperry, J.S. & McDowell, N.G. (2020). Plant responses to rising
+#    vapor pressure deficit. New Phytologist, 226(6): 1550-1566. doi:10.1111/nph.16485
+#    (a maioria das espécies reduz a condutância estomática à medida que o VPD sobe).
+#  - Eyland, D., Gambart, C., Swennen, R. & Carpentier, S. (2023). Unravelling the
+#    diversity in water usage among wild banana species in response to vapour pressure
+#    deficit. Frontiers in Plant Science, 14: 1068191. doi:10.3389/fpls.2023.1068191
+#    (em bananeira, resposta estomática/transpiratória significativa a partir de
+#    VPDleaf >= 1,5 kPa; breakpoints entre 1,6 e 2,5 kPa).
+VPD_FAIXAS_TXT = (
+    "- VPD é MÉDIA DIÁRIA do ar (estação INMET A545), NÃO o pico de meio-dia. "
+    "Classifique a média diária por estas faixas calibradas:\n"
+    "    • < 0,4 kPa  = BAIXO (ar úmido, baixa demanda evaporativa, maior chance de molhamento foliar);\n"
+    "    • 0,4-1,0 kPa = ADEQUADO (boa condutância estomática e troca gasosa na maioria das culturas);\n"
+    "    • 1,0-1,5 kPa = MODERADO (demanda evaporativa crescente, regulação estomática inicial);\n"
+    "    • > 1,5 kPa  = ALTO (a bananeira já mostra resposta estomática/transpiratória significativa; "
+    "a maioria das espécies reduz a condutância).\n"
+    "  NUNCA classifique o VPD como 'elevado/alto' abaixo de 1,0 kPa de média diária. "
+    "Base: Grossiord et al. (2020), New Phytol. 226(6):1550-1566; Eyland et al. (2023), Front. Plant Sci. 14:1068191."
+)
+
 def log(m): print(f"  {m}", flush=True)
 
 def f(v):
@@ -139,6 +166,7 @@ def analisar(ag, base):
         "- Tom consultivo, sem alarme. NUNCA diga 'solo seco' (é irrigado); fale em irrigação/fertirrigação.\n"
         "- Use 'mal de Sigatoka' (não 'Sigatoka negra').\n"
         "- Manchas vêm de ACÚMULO de molhamento (não de um dia). Fungos sobem no úmido; ácaros/tripes/vetores no quente-seco.\n"
+        + VPD_FAIXAS_TXT + "\n"
         "- Para cada cultura: 'acompanhar' (1 frase do status do dia), 'doencas', 'pragas', 'nutricao' (1-2 frases cada).")
     fichas = "\n\n".join(f"### FICHAS {c.upper()}\n{base[c][:6000]}" for c in ["banana","uva","citros","cacau"])
     schema_txt = json.dumps(SCHEMA, ensure_ascii=False)
