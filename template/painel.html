@@ -63,8 +63,13 @@
   .ac-cult-det{display:flex;flex-direction:column;gap:9px}.ac-cult-toggle{display:none;background:#f7faf7;border:1px solid var(--linha);border-radius:8px;color:var(--verde);font-weight:700;font-size:12.5px;padding:10px;cursor:pointer;min-height:42px;width:100%;text-align:center}
   .ac-acc{background:#fff;border:1px solid var(--linha);border-radius:12px;margin-top:12px;overflow:hidden}.ac-acc-h{padding:13px 14px;font-weight:700;font-size:13px;color:var(--verde);cursor:pointer;display:flex;justify-content:space-between;min-height:46px;align-items:center}.ac-acc-b{display:none;padding:0 14px 14px;font-size:12px;line-height:1.6}.ac-gloss-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ac-gloss-item strong{color:var(--verde)}.ac-met p{margin-bottom:8px}
   .ac-rodape{margin-top:20px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6}
+  .ac-voltar{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--verde);text-decoration:none;margin-bottom:10px;font-family:var(--sk-fonte-corpo,inherit)}
+  .ac-voltar:hover{text-decoration:underline}
+  .ac-rodape a{color:var(--verde);text-decoration:none;font-weight:600}.ac-rodape a:hover{text-decoration:underline}
   @media (max-width:760px){.ac-metrics{grid-template-columns:repeat(2,1fr)}.ac-prev{grid-template-columns:repeat(3,1fr)}.ac-culturas{grid-template-columns:1fr}.ac-gloss-grid{grid-template-columns:1fr}.ac-hero h1{font-size:22px}.ac-patroc{flex-direction:column;align-items:stretch;gap:8px}.ac-patroc-brand{flex-direction:row;border-right:none;border-bottom:1px solid var(--linha);padding-right:0;padding-bottom:8px;justify-content:center;gap:8px}.ac-patroc-brand img{height:38px}.ac-monit-table{display:none}.ac-monit-cards{display:block}.ac-cult-toggle{display:block}.ac-cult-det{display:none}.ac-cult-det.open{display:flex}}
 </style>
+
+<a class="ac-voltar" href="/">← Sassaki Agronegócios</a>
 
 «FAIXA»
 
@@ -122,7 +127,7 @@
 <p><strong>Automação:</strong> GitHub Actions → INMET + Open-Meteo → IA → publicação diária 06h00.</p>
 <p><strong>Curadoria:</strong> Edson Sassaki · Eng. Agrônomo.</p></div></div>
 
-<div class="ac-rodape"><p>Observado: INMET A545 · Previsão: Open-Meteo · ENSO: NOAA/CPC · Base: Embrapa, Fundecitrus, CEPLAC, Inst. Biológico, ESALQ/USP · IA: Claude Sonnet 4.6</p><p>⚠ Uso informativo — não substitui laudos técnicos agronômicos. Consulte seu engenheiro agrônomo.</p><p>Curadoria: Edson Sassaki · Eng. Agrônomo · sassakiagronegocios.com.br</p></div>
+<div class="ac-rodape"><p>Observado: INMET A545 · Previsão: Open-Meteo · ENSO: NOAA/CPC · Base: Embrapa, Fundecitrus, CEPLAC, Inst. Biológico, ESALQ/USP · IA: Claude Sonnet 4.6</p><p>⚠ Uso informativo — não substitui laudos técnicos agronômicos. Consulte seu engenheiro agrônomo.</p><p>Curadoria: Edson Sassaki · Eng. Agrônomo</p><p><a href="/">← Voltar para sassakiagronegocios.com.br</a></p></div>
 
 <script>function acT(id){var e=document.getElementById(id);if(e)e.style.display=e.style.display==='block'?'none':'block';}function det(c){var d=document.getElementById('det-'+c);if(!d)return;var o=d.classList.toggle('open');var b=document.getElementById('btn-'+c);if(b)b.textContent=o?'ocultar detalhes ▴':'ver detalhes ▾';}
 (function(){function initFix(){var orig=document.querySelector('.ac-patroc'),wrap=document.querySelector('.agroclima-wrap');if(!orig||!wrap||document.querySelector('.ac-patroc-fixed'))return;var bar=orig.cloneNode(true);bar.className=orig.className+' ac-patroc-fixed';document.body.appendChild(bar);function place(){var r=wrap.getBoundingClientRect();bar.style.left=r.left+'px';bar.style.width=r.width+'px';}function upd(){if(orig.getBoundingClientRect().bottom<0)bar.classList.add('show');else bar.classList.remove('show');}place();upd();window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',function(){place();upd();});}if(document.readyState!=='loading')initFix();else document.addEventListener('DOMContentLoaded',initFix);})();</script>
