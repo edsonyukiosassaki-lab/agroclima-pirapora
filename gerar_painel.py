@@ -167,13 +167,15 @@ SCHEMA = {"type":"object","additionalProperties":False,"properties":{
 def analisar(ag, base):
     import anthropic
     o = ag["ontem"]
-    pres_str = ", ".join(f"{p['mes']}={p['n']}" for p in ag["pressao"])
+    pres_str = ", ".join(f"{p['mes']}={p['n']}h({'acima' if p['dev']>1.1 else 'abaixo' if p['dev']<0.9 else 'normal'} da media {p['norm']}h)" for p in ag["pressao"])
     ctx = (f"Pirapora/MG, fruticultura IRRIGADA. Banana é a cultura do produtor; uva/citros/cacau são da região.\n"
         f"Data: {ag['data_br']}. Ontem: ET0={o['et0']} mm, VPD={o['vpd']} kPa, Tmax={o['tmax']}°C, "
         f"Tmin={o['tmin']}°C, radiação={o['rad']} MJ, vento={o['vento']} m/s, chuva={o['chuva']} mm.\n"
         f"Acumulados: ET0 7d={ag['et0_7d']} mm, 30d={ag['et0_30d']} mm; VPD médio 7d={ag['vpd_7d']} kPa; "
         f"chuva 30d={ag['chuva_30d']} mm em {ag['dias_chuva_30d']} dias; menor Tmin 7d={ag['tmin_7d_min']}°C.\n"
-        f"Pressão de molhamento (dias UR≥80/mês): {pres_str}.")
+        f"MOLHAMENTO FOLIAR (orvalho, HORAS reais com UR≥90% medidas na estação) — é o DRIVER dos fungos de mancha, NÃO a chuva:\n"
+        f"  últimos 15 dias = {ag['molh15']} h de molhamento → risco fúngico de mancha {ag['risco15'].upper()};\n"
+        f"  horas por mês vs média histórica de 11 anos: {pres_str}.")
     regras = ("REGRAS OBRIGATÓRIAS:\n"
         "- Só cite doença/praga que esteja nas FICHAS abaixo (por cultura). Nunca invente.\n"
         "- Itens com 'ativo_no_painel: vigilancia' ou 'região livre': NÃO geram alerta — só vigilância.\n"
@@ -182,6 +184,7 @@ def analisar(ag, base):
         "NUNCA prescreva ação operacional (pulverizar, aplicar fungicida, ensacar, desfolha, dose, produto, intervalo de aplicação) — a decisão é de cada produtor.\n"
         "- Use 'mal de Sigatoka' (não 'Sigatoka negra').\n"
         "- Manchas vêm de ACÚMULO de molhamento (não de um dia). Fungos sobem no úmido; ácaros/tripes/vetores no quente-seco.\n"
+        "- CHUVA BAIXA NÃO É MOLHAMENTO BAIXO: em tempo seco pode haver muito ORVALHO (UR≥90% de madrugada). Baseie o risco de mancha/Sigatoka/Pyricularia/Deightoniella NO MOLHAMENTO REAL informado acima (15 dias + vs média histórica), NUNCA na chuva. Se o molhamento está alto/acima do normal, o risco de mancha é ELEVADO mesmo com chuva baixa. Seja COERENTE com a seção de molhamento do painel — não diga 'baixa pressão de molhamento' quando os dados mostram molhamento alto.\n"
         + VPD_FAIXAS_TXT + "\n"
         "- Para cada cultura: 'acompanhar' (1 frase do status do dia), 'doencas', 'pragas', 'nutricao' (1-2 frases cada).")
     fichas = "\n\n".join(f"### FICHAS {c.upper()}\n{base[c][:6000]}" for c in ["banana","uva","citros","cacau"])
