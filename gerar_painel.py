@@ -186,6 +186,7 @@ def analisar(ag, base):
         "- Manchas vêm de ACÚMULO de molhamento (não de um dia). Fungos sobem no úmido; ácaros/tripes/vetores no quente-seco.\n"
         "- CHUVA BAIXA NÃO É MOLHAMENTO BAIXO: em tempo seco pode haver muito ORVALHO (UR≥90% de madrugada). Baseie o risco de mancha/Sigatoka/Pyricularia/Deightoniella NO MOLHAMENTO REAL informado acima (15 dias + vs média histórica), NUNCA na chuva. Se o molhamento está alto/acima do normal, o risco de mancha é ELEVADO mesmo com chuva baixa. Seja COERENTE com a seção de molhamento do painel — não diga 'baixa pressão de molhamento' quando os dados mostram molhamento alto.\n"
         + VPD_FAIXAS_TXT + "\n"
+        "- ANÁLISE MULTI-FATOR: a 'risco_frase' do topo e o 'acompanhar' devem INTEGRAR todos os sinais relevantes do dia, não focar só no molhamento. Considere e mencione quando em destaque: molhamento foliar → fungos de mancha; Tmin baixa (<13°C) → frio/estresse na bananeira; VPD/ET0 → demanda hídrica/irrigação; calor + seco → tripes/ácaros. Pondere o conjunto.\n"
         "- Para cada cultura: 'acompanhar' (1 frase do status do dia), 'doencas', 'pragas', 'nutricao' (1-2 frases cada).")
     fichas = "\n\n".join(f"### FICHAS {c.upper()}\n{base[c][:6000]}" for c in ["banana","uva","citros","cacau"])
     schema_txt = json.dumps(SCHEMA, ensure_ascii=False)
