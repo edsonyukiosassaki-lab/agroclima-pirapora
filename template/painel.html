@@ -11,6 +11,14 @@
   .ac-group{display:flex;align-items:center;gap:40px;padding-right:40px}
   .ac-patroc-item{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;flex:0 0 auto}
   .tier-fundador img{height:70px}.tier-premium img{height:58px}.tier-master img{height:58px}.tier-apoio img{height:48px}
+  /* faixa fixa compacta: aparece ao rolar (position:fixed pois #page do tema WP tem overflow:hidden e quebra sticky) */
+  .ac-patroc.ac-patroc-fixed{position:fixed;top:0;z-index:1000;margin:0;border-radius:0;border:none;border-bottom:1px solid var(--linha);box-shadow:0 3px 12px rgba(0,0,0,.12);transform:translateY(-105%);transition:transform .28s ease;padding:5px 12px;flex-direction:row;align-items:center;gap:12px}
+  .ac-patroc.ac-patroc-fixed.show{transform:translateY(0)}
+  .ac-patroc.ac-patroc-fixed .ac-patroc-brand{flex-direction:row;border-right:1px solid var(--linha);border-bottom:none;padding:0 12px 0 0;flex:0 0 auto;gap:0}
+  .ac-patroc.ac-patroc-fixed .ac-patroc-brand img{height:24px}
+  .ac-patroc.ac-patroc-fixed .ac-patroc-brand small{display:none}
+  .ac-patroc.ac-patroc-fixed .tier-premium img,.ac-patroc.ac-patroc-fixed .tier-master img,.ac-patroc.ac-patroc-fixed .tier-fundador img,.ac-patroc.ac-patroc-fixed .tier-apoio img{height:30px}
+  .ac-patroc.ac-patroc-fixed .ac-cota{display:none}
   .ac-cota{font-size:7.5px;font-weight:700;padding:1px 6px;border-radius:20px;white-space:nowrap}
   .cota-origem{background:#e9f6ec;color:#1f7a3d}.cota-zenite{background:#FAEEDA;color:#854F0B}.cota-alisios{background:#E6F1FB;color:#185FA5}.cota-bromelia{background:#f3eefb;color:#6b3fa0}
   @keyframes ac-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -115,5 +123,6 @@
 
 <div class="ac-rodape"><p>Observado: INMET A545 · Previsão: Open-Meteo · ENSO: NOAA/CPC · Base: Embrapa, Fundecitrus, CEPLAC, Inst. Biológico, ESALQ/USP · IA: Claude Sonnet 4.6</p><p>⚠ Uso informativo — não substitui laudos técnicos agronômicos. Consulte seu engenheiro agrônomo.</p><p>Curadoria: Edson Sassaki · Eng. Agrônomo · sassakiagronegocios.com.br</p></div>
 
-<script>function acT(id){var e=document.getElementById(id);if(e)e.style.display=e.style.display==='block'?'none':'block';}function det(c){var d=document.getElementById('det-'+c);if(!d)return;var o=d.classList.toggle('open');var b=document.getElementById('btn-'+c);if(b)b.textContent=o?'ocultar detalhes ▴':'ver detalhes ▾';}</script>
+<script>function acT(id){var e=document.getElementById(id);if(e)e.style.display=e.style.display==='block'?'none':'block';}function det(c){var d=document.getElementById('det-'+c);if(!d)return;var o=d.classList.toggle('open');var b=document.getElementById('btn-'+c);if(b)b.textContent=o?'ocultar detalhes ▴':'ver detalhes ▾';}
+(function(){function initFix(){var orig=document.querySelector('.ac-patroc'),wrap=document.querySelector('.agroclima-wrap');if(!orig||!wrap||document.querySelector('.ac-patroc-fixed'))return;var bar=orig.cloneNode(true);bar.className=orig.className+' ac-patroc-fixed';document.body.appendChild(bar);function place(){var r=wrap.getBoundingClientRect();bar.style.left=r.left+'px';bar.style.width=r.width+'px';}function upd(){if(orig.getBoundingClientRect().bottom<0)bar.classList.add('show');else bar.classList.remove('show');}place();upd();window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',function(){place();upd();});}if(document.readyState!=='loading')initFix();else document.addEventListener('DOMContentLoaded',initFix);})();</script>
 </div>
