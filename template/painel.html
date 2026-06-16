@@ -1,5 +1,6 @@
 <div class="agroclima-wrap"><style>
-  .agroclima-wrap{--verde:#2d6e3e;--verde-claro:#3f9152;--amarelo:#caa00a;--vermelho:#c0392b;--bg:#f4f7f4;--card:#fff;--linha:#e3ebe3;--txt:#1f2a24;--muted:#65766b;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--txt);line-height:1.5;max-width:1080px;margin:0 auto}
+  /* cores/fonte de identidade puxam os tokens --sk-* do child theme (fallback = valor original, à prova de tema desativado). Amarelo/vermelho continuam funcionais (níveis de risco). */
+  .agroclima-wrap{--verde:var(--sk-verde,#2d6e3e);--verde-claro:var(--sk-verde-claro,#3f9152);--amarelo:#caa00a;--vermelho:#c0392b;--bg:var(--sk-cor-fundo-suave,#f4f7f4);--card:var(--sk-cor-fundo,#fff);--linha:var(--sk-cor-borda,#e3ebe3);--txt:var(--sk-cor-texto,#1f2a24);--muted:var(--sk-cor-texto-suave,#65766b);font-family:var(--sk-fonte-corpo,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif);color:var(--txt);line-height:1.5;max-width:1080px;margin:0 auto}
   .agroclima-wrap *{box-sizing:border-box}
   .agroclima-wrap a{color:var(--verde)}
   .ac-risco,.ac-cult,.ac-monit-wrap{scroll-margin-top:64px}
@@ -22,8 +23,8 @@
   .ac-cota{font-size:7.5px;font-weight:700;padding:1px 6px;border-radius:20px;white-space:nowrap}
   .cota-origem{background:#e9f6ec;color:#1f7a3d}.cota-zenite{background:#FAEEDA;color:#854F0B}.cota-alisios{background:#E6F1FB;color:#185FA5}.cota-bromelia{background:#f3eefb;color:#6b3fa0}
   @keyframes ac-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  .ac-hero{background:linear-gradient(135deg,#2d6e3e,#3f9152);color:#fff;border-radius:16px;padding:20px;margin-bottom:12px}
-  .ac-hero h1{font-size:26px;font-weight:800}.ac-hero h1 em{font-style:normal;opacity:.85;font-weight:600}
+  .ac-hero{background:linear-gradient(135deg,var(--sk-verde,#2d6e3e),var(--sk-verde-claro,#3f9152));color:#fff;border-radius:16px;padding:20px;margin-bottom:12px}
+  .ac-hero h1{font-size:26px;font-weight:600;font-family:var(--sk-fonte-titulo,inherit)}.ac-hero h1 em{font-style:normal;opacity:.85;font-weight:600}
   .ac-sub{opacity:.9;font-size:13px;margin-top:2px}.ac-frase{margin-top:10px;font-size:13px;opacity:.95;border-left:3px solid rgba(255,255,255,.5);padding-left:10px}
   .ac-update{margin-top:12px;font-size:12px;opacity:.9;display:flex;align-items:center;gap:7px}.ac-dot{width:8px;height:8px;border-radius:50%;background:#8ff0a4;box-shadow:0 0 0 3px rgba(143,240,164,.3)}
   .ac-nav{position:sticky;top:0;z-index:30;background:rgba(244,247,244,.96);padding:8px 4px;margin:0 -4px 14px;display:flex;gap:7px;overflow-x:auto;border-bottom:1px solid var(--linha)}
