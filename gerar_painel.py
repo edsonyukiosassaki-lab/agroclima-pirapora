@@ -25,6 +25,10 @@ DRY        = "--dry-run" in sys.argv or "--publicar" not in sys.argv
 MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"]
 DIAS  = ["seg","ter","qua","qui","sex","sáb","dom"]
 
+# Climatologia de molhamento foliar (h/dia com UR>=90%), média histórica da estação INMET A545
+# (Pirapora, ~11 anos: 2013-2025). Base para "este mês está acima/abaixo do normal".
+CLIM_MOLH = {1:5.3, 2:5.3, 3:4.3, 4:4.2, 5:3.5, 6:2.4, 7:1.1, 8:0.1, 9:0.3, 10:1.0, 11:3.1, 12:5.4}
+
 # Faixas de VPD para calibrar a leitura da IA (impedir chamar VPD baixo de "elevado").
 # IMPORTANTE: o VPD do painel é MÉDIA DIÁRIA do ar (estação INMET A545), não o pico de
 # meio-dia; por isso as faixas abaixo são mais baixas que os limiares instantâneos
@@ -68,7 +72,7 @@ SUPA_URL = os.environ.get("SUPABASE_URL", "https://fxkdjzguyxtbfadmoemg.supabase
 SUPA_KEY = os.environ.get("SUPABASE_KEY", "")
 
 def ler_clima():
-    cols = "data,et0_mm,vpd_kpa,temp_max_c,temp_min_c,umidade_relativa_pct,radiacao_solar_mj,vento_ms,precipitacao_mm,status"
+    cols = "data,et0_mm,vpd_kpa,temp_max_c,temp_min_c,umidade_relativa_pct,radiacao_solar_mj,vento_ms,precipitacao_mm,status,horas_molhamento"
     url = f"{SUPA_URL}/rest/v1/clima?select={cols}&order=data.desc&limit=400"
     r = requests.get(url, headers={"apikey": SUPA_KEY, "Authorization": f"Bearer {SUPA_KEY}"}, timeout=30)
     r.raise_for_status()
@@ -79,7 +83,7 @@ def ler_clima():
         dados.append({"data": dt, "et0": f(x.get("et0_mm")), "vpd": f(x.get("vpd_kpa")),
             "tmax": f(x.get("temp_max_c")), "tmin": f(x.get("temp_min_c")), "ur": f(x.get("umidade_relativa_pct")),
             "rad": f(x.get("radiacao_solar_mj")), "vento": f(x.get("vento_ms")), "chuva": f(x.get("precipitacao_mm")),
-            "status": x.get("status") or ""})
+            "molh": f(x.get("horas_molhamento")), "status": x.get("status") or ""})
     dados.sort(key=lambda d: d["data"])
     return dados
 
@@ -92,14 +96,23 @@ def agregar(dados):
     d = ontem["data"]
     j7  = [x for x in dados if (d - x["data"]).days < 7]
     j30 = [x for x in dados if (d - x["data"]).days < 30]
-    # pressao acumulada de mancha: dias UR>=80 por mes (ultimos 6 meses)
-    pormes = {}
+    # pressao de mancha: HORAS reais de molhamento (UR>=90%, dado horario) por mes,
+    # comparadas a media historica de 11 anos (CLIM_MOLH). Ultimos 6 meses.
+    pormes = {}  # (y,m) -> [soma_horas, n_dias_com_dado]
     for x in dados:
+        if x["molh"] is None: continue
         if (d.year - x["data"].year)*12 + (d.month - x["data"].month) <= 5:
             key = (x["data"].year, x["data"].month)
-            pormes.setdefault(key, 0)
-            if x["ur"] is not None and x["ur"] >= 80: pormes[key] += 1
-    pres = [{"mes": MESES[m-1], "n": n} for (y,m), n in sorted(pormes.items())][-6:]
+            pormes.setdefault(key, [0, 0]); pormes[key][0] += x["molh"]; pormes[key][1] += 1
+    pres = []
+    for (y, m), (soma_h, nd) in sorted(pormes.items())[-6:]:
+        norm = round(CLIM_MOLH.get(m, 0) * nd)
+        pres.append({"mes": MESES[m-1], "n": round(soma_h), "norm": norm,
+                     "dev": (soma_h/norm if norm > 0 else (1.0 if soma_h == 0 else 2.0))})
+    # molhamento dos ultimos 15 dias (janela de infeccao ~48h) + nivel de risco fungico
+    j15 = [x["molh"] for x in dados if x["molh"] is not None and (d - x["data"]).days < 15]
+    molh15 = round(sum(j15))
+    risco15 = "alto" if molh15 >= 48 else "moderado" if molh15 >= 24 else "baixo"
     return {
         "ontem": ontem, "data_iso": d.isoformat(), "data_br": d.strftime("%d/%m/%Y"),
         "et0_7d": soma([x["et0"] for x in j7]), "et0_30d": soma([x["et0"] for x in j30]),
@@ -107,7 +120,7 @@ def agregar(dados):
         "chuva_30d": soma([x["chuva"] for x in j30]),
         "dias_chuva_30d": sum(1 for x in j30 if (x["chuva"] or 0) > 0),
         "tmin_7d_min": min([x["tmin"] for x in j7 if x["tmin"] is not None], default=None),
-        "pressao": pres,
+        "pressao": pres, "molh15": molh15, "risco15": risco15,
     }
 
 # ---------- 2. PREVISAO ----------
@@ -154,20 +167,26 @@ SCHEMA = {"type":"object","additionalProperties":False,"properties":{
 def analisar(ag, base):
     import anthropic
     o = ag["ontem"]
-    pres_str = ", ".join(f"{p['mes']}={p['n']}" for p in ag["pressao"])
+    pres_str = ", ".join(f"{p['mes']}={p['n']}h({'acima' if p['dev']>1.1 else 'abaixo' if p['dev']<0.9 else 'normal'} da media {p['norm']}h)" for p in ag["pressao"])
     ctx = (f"Pirapora/MG, fruticultura IRRIGADA. Banana é a cultura do produtor; uva/citros/cacau são da região.\n"
         f"Data: {ag['data_br']}. Ontem: ET0={o['et0']} mm, VPD={o['vpd']} kPa, Tmax={o['tmax']}°C, "
         f"Tmin={o['tmin']}°C, radiação={o['rad']} MJ, vento={o['vento']} m/s, chuva={o['chuva']} mm.\n"
         f"Acumulados: ET0 7d={ag['et0_7d']} mm, 30d={ag['et0_30d']} mm; VPD médio 7d={ag['vpd_7d']} kPa; "
         f"chuva 30d={ag['chuva_30d']} mm em {ag['dias_chuva_30d']} dias; menor Tmin 7d={ag['tmin_7d_min']}°C.\n"
-        f"Pressão de molhamento (dias UR≥80/mês): {pres_str}.")
+        f"MOLHAMENTO FOLIAR (orvalho, HORAS reais com UR≥90% medidas na estação) — é o DRIVER dos fungos de mancha, NÃO a chuva:\n"
+        f"  últimos 15 dias = {ag['molh15']} h de molhamento → risco fúngico de mancha {ag['risco15'].upper()};\n"
+        f"  horas por mês vs média histórica de 11 anos: {pres_str}.")
     regras = ("REGRAS OBRIGATÓRIAS:\n"
         "- Só cite doença/praga que esteja nas FICHAS abaixo (por cultura). Nunca invente.\n"
         "- Itens com 'ativo_no_painel: vigilancia' ou 'região livre': NÃO geram alerta — só vigilância.\n"
         "- Tom consultivo, sem alarme. NUNCA diga 'solo seco' (é irrigado); fale em irrigação/fertirrigação.\n"
+        "- PAINEL PÚBLICO: comunique APENAS risco/condição e termine em 'monitore/acompanhe/fique atento'. "
+        "NUNCA prescreva ação operacional (pulverizar, aplicar fungicida, ensacar, desfolha, dose, produto, intervalo de aplicação) — a decisão é de cada produtor.\n"
         "- Use 'mal de Sigatoka' (não 'Sigatoka negra').\n"
         "- Manchas vêm de ACÚMULO de molhamento (não de um dia). Fungos sobem no úmido; ácaros/tripes/vetores no quente-seco.\n"
+        "- CHUVA BAIXA NÃO É MOLHAMENTO BAIXO: em tempo seco pode haver muito ORVALHO (UR≥90% de madrugada). Baseie o risco de mancha/Sigatoka/Pyricularia/Deightoniella NO MOLHAMENTO REAL informado acima (15 dias + vs média histórica), NUNCA na chuva. Se o molhamento está alto/acima do normal, o risco de mancha é ELEVADO mesmo com chuva baixa. Seja COERENTE com a seção de molhamento do painel — não diga 'baixa pressão de molhamento' quando os dados mostram molhamento alto.\n"
         + VPD_FAIXAS_TXT + "\n"
+        "- ANÁLISE MULTI-FATOR: a 'risco_frase' do topo e o 'acompanhar' devem INTEGRAR todos os sinais relevantes do dia, não focar só no molhamento. Considere e mencione quando em destaque: molhamento foliar → fungos de mancha; Tmin baixa (<13°C) → frio/estresse na bananeira; VPD/ET0 → demanda hídrica/irrigação; calor + seco → tripes/ácaros. Pondere o conjunto.\n"
         "- Para cada cultura: 'acompanhar' (1 frase do status do dia), 'doencas', 'pragas', 'nutricao' (1-2 frases cada).")
     fichas = "\n\n".join(f"### FICHAS {c.upper()}\n{base[c][:6000]}" for c in ["banana","uva","citros","cacau"])
     schema_txt = json.dumps(SCHEMA, ensure_ascii=False)
@@ -247,13 +266,18 @@ def montar_html(ag, prev, ia, ps, b64):
     mh="".join(f'<div class="ac-metric"><div class="ac-metric-label">{n}</div><div class="ac-metric-valor" style="font-size:20px">{v}</div><div class="ac-metric-unit">{u}</div><div class="ac-metric-acum">{a}</div></div>' for n,v,u,a in metr)
     ph="".join(f'<div class="ac-prev-card"><div class="ac-prev-dia">{p["label"]}</div><div class="ac-prev-ic">{p["ic"]}</div><div class="ac-prev-temp"><span class="tmax">{p["tmax"]}°</span> <span class="tmin">{p["tmin"]}°</span></div><div class="ac-prev-chuva">{p["chuva"]}% chuva</div></div>' for p in prev) or '<div style="color:#65766b">previsão indisponível</div>'
     mx=max([p["n"] for p in ag["pressao"]]+[1])
-    pb="".join(f'<div class="ac-pb"><div class="ac-pb-val">{p["n"]}</div><div class="ac-pb-bar" style="height:{max(5,int(p["n"]/mx*100))}%;--c:{("#7ec98e" if p["n"]<5 else "#e8a33d" if p["n"]<10 else "#d9534f")}"></div><div class="ac-pb-lb">{p["mes"].capitalize()}</div></div>' for p in ag["pressao"])
+    cor_dev=lambda dev: "#d9534f" if dev>1.1 else ("#e8a33d" if dev>=0.9 else "#7ec98e")
+    pb="".join(f'<div class="ac-pb"><div class="ac-pb-val">{p["n"]}h</div><div class="ac-pb-bar" style="height:{max(5,int(p["n"]/mx*100))}%;--c:{cor_dev(p["dev"])}"></div><div class="ac-pb-lb">{p["mes"].capitalize()}</div><div class="ac-pb-norm">méd {p["norm"]}h</div></div>' for p in ag["pressao"])
+    r15=ag["risco15"]; cor15={"alto":"#d9534f","moderado":"#e8a33d","baixo":"#7ec98e"}[r15]
+    txt15={"alto":"Risco de mancha foliar ELEVADO","moderado":"Risco de mancha foliar MODERADO","baixo":"Risco de mancha foliar BAIXO"}[r15]
+    molh15_html=f'<div class="ac-molh15" style="--c:{cor15}"><span class="ac-molh15-dot"></span><strong>{txt15}</strong> nos últimos 15 dias — {ag["molh15"]} h de molhamento foliar (UR≥90%).</div>'
+    preventiva=('<div class="ac-pressao-txt">🍌 Cachos em formação agora sob maior pressão de mancha — o sintoma costuma aparecer ~60–70 dias depois. <strong>Acompanhe.</strong></div>' if r15=="alto" else "")
     cult={c["cultura"]:c for c in ia["culturas"]}
     cards="".join(card_cultura(cult[k]) for k in ["banana","uva","citros","cacau"] if k in cult)
     tpl=(RAIZ/"template"/"painel.html").read_text(encoding="utf-8")
     rep={"«FAIXA»":faixa_patrocinadores(ps,b64),"«DATA»":ag["data_br"],
          "«RISCO_CLASSE»":nivel_classe,"«RISCO_NIVEL»":ia["risco_nivel"],"«RISCO_FRASE»":ia["risco_frase"],
-         "«METRICAS»":mh,"«PREVISAO»":ph,"«PRESSAO»":pb,"«CULTURAS»":cards,
+         "«METRICAS»":mh,"«PREVISAO»":ph,"«PRESSAO»":pb,"«MOLH15»":molh15_html,"«PREVENTIVA»":preventiva,"«CULTURAS»":cards,
          "«CHUVA30»":br(ag["chuva_30d"]),"«DIASCHUVA»":str(ag["dias_chuva_30d"])}
     for k,v in rep.items(): tpl=tpl.replace(k,str(v))
     return tpl

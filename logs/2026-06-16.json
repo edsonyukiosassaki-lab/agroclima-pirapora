@@ -3,6 +3,6 @@
   "risco": "ATENÇÃO",
   "previsao_dias": 5,
   "patrocinadores": 2,
-  "status": "publicado 200",
-  "executado": "2026-06-16T15:26:46.245164"
+  "status": "dry-run",
+  "executado": "2026-06-16T16:48:38.453531"
 }

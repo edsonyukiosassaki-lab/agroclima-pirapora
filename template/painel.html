@@ -44,9 +44,12 @@
   .ac-flip{background:#fff7e8;border:1px solid #f0e0a8;border-radius:12px;padding:10px 14px;font-size:12.5px;color:#7a5a1f;margin-bottom:6px}
   .ac-pressao{background:#fff;border:1px solid var(--linha);border-radius:14px;padding:14px;margin-bottom:6px}
   .ac-pressao-cap{font-size:12px;color:var(--muted);max-width:640px}
-  .ac-pressao-bars{display:flex;gap:8px;align-items:flex-end;height:96px;margin:14px 0 6px}
-  .ac-pb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;justify-content:flex-end;height:100%}
+  .ac-pressao-bars{display:flex;gap:8px;align-items:flex-end;height:112px;margin:14px 0 6px}
+  .ac-pb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;justify-content:flex-end;height:100%}
   .ac-pb-val{font-size:11px;font-weight:700}.ac-pb-bar{width:100%;border-radius:5px 5px 0 0;background:var(--c);min-height:4px}.ac-pb-lb{font-size:11px;color:var(--muted);font-weight:600}
+  .ac-pb-norm{font-size:9px;color:var(--muted);line-height:1}
+  .ac-molh15{display:flex;align-items:center;gap:8px;font-size:13px;background:#fff;border:1px solid var(--linha);border-left:4px solid var(--c);border-radius:8px;padding:9px 12px;margin-bottom:10px}
+  .ac-molh15-dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex:0 0 auto}
   .ac-pressao-txt{font-size:12px;color:#225c34;background:#eef7f0;border:1px solid #c7e6cf;border-radius:8px;padding:8px 10px;margin-top:8px}
   .ac-monit{background:#fff;border:1px solid var(--linha);border-radius:14px;overflow:hidden;margin-bottom:6px}
   .ac-monit-table{width:100%;border-collapse:collapse;font-size:12px}.ac-monit-table th,.ac-monit-table td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--linha);vertical-align:top}.ac-monit-table th{background:#f7faf7;color:var(--verde);font-size:10.5px;text-transform:uppercase}
@@ -91,8 +94,8 @@
 
 <div class="ac-flip">🔁 Os fungos de mancha sobem no <strong>úmido/molhamento</strong>; <strong>ácaros, tripes e vetores</strong> sobem no <strong>quente/seco</strong>. O painel troca o tipo de alerta conforme o clima — nunca fica "tudo verde".</div>
 
-<div class="ac-sec">Pressão acumulada de manchas no fruto — banana</div>
-<div class="ac-pressao"><div class="ac-pressao-cap">Molhamento foliar por mês (dias com UR≥80%) — o que alimenta os fungos de mancha (mal de Sigatoka, mancha-diamante/Pyricularia, Deightoniella, Cordana). Últimos 30 dias: «CHUVA30» mm de chuva em «DIASCHUVA» dias.</div><div class="ac-pressao-bars">«PRESSAO»</div><div class="ac-pressao-txt">🦠 As manchas no fruto resultam do <strong>acúmulo</strong> de molhamento ao longo de semanas, não de um dia. Barras vermelhas = meses úmidos que constroem a pressão; verdes = meses secos em que ela cai.</div></div>
+<div class="ac-sec">Molhamento foliar e pressão de manchas fúngicas — banana</div>
+<div class="ac-pressao"><div class="ac-pressao-cap"><strong>Horas de molhamento foliar (UR≥90%)</strong> — água livre na folha é o que alimenta os fungos de mancha (mal de Sigatoka, mancha-diamante/Pyricularia, Deightoniella, Cordana). Dado horário real da estação INMET A545; barra = total do mês, "méd" = média histórica de 11 anos.</div>«MOLH15»<div class="ac-pressao-bars">«PRESSAO»</div><div class="ac-pressao-txt">🦠 As manchas no fruto resultam do <strong>acúmulo</strong> de molhamento ao longo de semanas, não de um dia. Barra <strong style="color:#d9534f">vermelha</strong> = mês <strong>acima</strong> do molhamento normal; <strong style="color:#225c34">verde</strong> = abaixo do normal.</div>«PREVENTIVA»</div>
 
 <div class="ac-sec" id="monit">Doenças e pragas monitoradas na região</div>
 <div style="font-size:11px;color:#65766b;margin:-4px 0 8px">"Vigilância" = monitorado preventivamente; presença não confirmada na região.</div>
