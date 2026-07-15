@@ -12,6 +12,8 @@ import os, sys, json, base64, glob, datetime, pathlib, urllib.parse
 
 import requests
 
+import fallback_estacao
+
 SHEET_ID   = "1oaqeRuwsQ7xTpM4CWv2PqC7GlTPHRCZGD5882IveCM4"   # AgroClima (BD_clima_auto)
 ABA_CLIMA  = "BD_clima_auto"
 ABA_PATRO  = "patrocinadores"
@@ -90,6 +92,35 @@ def ler_clima():
 def soma(seq): seq=[x for x in seq if x is not None]; return round(sum(seq),1) if seq else 0.0
 def media(seq): seq=[x for x in seq if x is not None]; return round(sum(seq)/len(seq),2) if seq else None
 
+# ---------- 1b. PLANO B (fallback da estação — dias faltantes viram estimativa marcada) ----------
+def aplicar_fallback(dados, hoje_sp):
+    """Se faltarem dias recentes na tabela clima (estação falhou), estima-os com o
+    Open-Meteo (fallback_estacao.py, limiares calibrados na PARTE ZERO) e devolve
+    (dados_completos, fb). Nada é gravado em banco/planilha — só nesta execução."""
+    ontem = hoje_sp - datetime.timedelta(days=1)
+    datas_ok = {x["data"] for x in dados}
+    janela = [ontem - datetime.timedelta(days=i) for i in range(15)]
+    faltantes = [d for d in janela if d not in datas_ok]
+    fb = {"datas": [], "ontem_estimado": False, "sem_dado": [], "molh_est_h": 0, "consec": 0}
+    if faltantes:
+        log(f"Fallback: {len(faltantes)} dia(s) sem estação na janela de 15d: "
+            + ", ".join(d.strftime("%d/%m") for d in sorted(faltantes)))
+        estimados = fallback_estacao.estimar_dias(faltantes, hoje=hoje_sp)
+        for d in sorted(faltantes):
+            if d in estimados:
+                dados.append(estimados[d])
+                fb["datas"].append(d)
+                fb["molh_est_h"] += estimados[d]["molh"] or 0
+            else:
+                fb["sem_dado"].append(d)   # falha dupla: nem estação, nem estimativa
+        dados.sort(key=lambda x: x["data"])
+        fb["ontem_estimado"] = ontem in estimados
+        # dias consecutivos sem estação terminando em ontem (para o alerta de 48h)
+        d = ontem
+        while d in set(faltantes):
+            fb["consec"] += 1; d -= datetime.timedelta(days=1)
+    return dados, fb
+
 def agregar(dados):
     if not dados: raise SystemExit("Sem dados de clima.")
     ontem = dados[-1]
@@ -167,8 +198,17 @@ SCHEMA = {"type":"object","additionalProperties":False,"properties":{
 def analisar(ag, base):
     import anthropic
     o = ag["ontem"]
+    fb = ag.get("fb") or {}
+    aviso_fb = ""
+    if fb.get("ontem_estimado"):
+        aviso_fb = ("\nATENÇÃO: a estação INMET está indisponível — os dados de ONTEM acima são "
+                    "ESTIMATIVAS de modelo (Open-Meteo, calibradas), não medições. Nos textos, deixe claro "
+                    "que a leitura do dia é 'com base em estimativa' e evite afirmações categóricas sobre o dia.\n")
+    elif fb.get("datas"):
+        aviso_fb = (f"\nNOTA: {len(fb['datas'])} dia(s) recentes usam estimativa (estação falhou); "
+                    f"o acumulado de molhamento inclui {fb['molh_est_h']} h estimadas.\n")
     pres_str = ", ".join(f"{p['mes']}={p['n']}h({'acima' if p['dev']>1.1 else 'abaixo' if p['dev']<0.9 else 'normal'} da media {p['norm']}h)" for p in ag["pressao"])
-    ctx = (f"Pirapora/MG, fruticultura IRRIGADA. Banana é a cultura do produtor; uva/citros/cacau são da região.\n"
+    ctx = (aviso_fb + f"Pirapora/MG, fruticultura IRRIGADA. Banana é a cultura do produtor; uva/citros/cacau são da região.\n"
         f"Data: {ag['data_br']}. Ontem: ET0={o['et0']} mm, VPD={o['vpd']} kPa, Tmax={o['tmax']}°C, "
         f"Tmin={o['tmin']}°C, radiação={o['rad']} MJ, vento={o['vento']} m/s, chuva={o['chuva']} mm.\n"
         f"Acumulados: ET0 7d={ag['et0_7d']} mm, 30d={ag['et0_30d']} mm; VPD médio 7d={ag['vpd_7d']} kPa; "
@@ -255,14 +295,38 @@ def card_cultura(c):
         f'<div class="ac-item nova nutri"><span class="ic">🧪</span><span><strong>Nutrição:</strong> {c["nutricao"]}</span></div>'
         f'<div class="ac-protecao">ℹ Informativo — não substitui laudo técnico agronômico local.</div></div></div></div>')
 
+def aviso_fallback_html(fb, ontem_data):
+    """Faixa de transparência quando há dia estimado ou sem dado (Plano B)."""
+    partes=[]
+    if fb.get("ontem_estimado"):
+        partes.append(
+            f'<div style="background:#fff7e0;border:1px solid #e8a33d;border-radius:8px;padding:10px 14px;margin:6px 0 10px;font-size:13px;color:#7a5a12">'
+            f'⚠️ <strong>Estação INMET A545 indisponível em {ontem_data.strftime("%d/%m")} — exibindo estimativa (Open-Meteo).</strong> '
+            f'Os valores são aproximados; o dado real volta automaticamente quando a estação se recuperar.</div>')
+    elif fb.get("datas"):
+        dias=", ".join(d.strftime("%d/%m") for d in fb["datas"])
+        partes.append(
+            f'<div style="background:#fff7e0;border:1px solid #e8a33d;border-radius:8px;padding:8px 14px;margin:6px 0 10px;font-size:12px;color:#7a5a12">'
+            f'⚠️ Dia(s) com estimativa (Open-Meteo) por falha da estação: <strong>{dias}</strong> — o acumulado de molhamento inclui horas estimadas.</div>')
+    if fb.get("sem_dado"):
+        dias=", ".join(d.strftime("%d/%m") for d in fb["sem_dado"])
+        partes.append(
+            f'<div style="background:#fdecea;border:1px solid #d9534f;border-radius:8px;padding:8px 14px;margin:6px 0 10px;font-size:12px;color:#8a2620">'
+            f'⛔ Sem dado em <strong>{dias}</strong>: estação E estimativa indisponíveis. Estes dias não entram nos acumulados.</div>')
+    return "".join(partes)
+
 def montar_html(ag, prev, ia, ps, b64):
     o=ag["ontem"]
+    fb=ag.get("fb") or {}
+    ontem_estimado=bool(o.get("estimado"))
     nivel_classe={"OK":"verde","ATENÇÃO":"amarelo","ESTRESSE":"vermelho","ESTRESSE SEVERO":"vermelho"}[ia["risco_nivel"]]
-    metr=[("ET₀ ontem",br(o["et0"],2),"mm/dia",f"7d: <strong>{br(ag['et0_7d'])}</strong> · 30d: <strong>{br(ag['et0_30d'])}</strong> mm"),
-          ("VPD ontem",br(o["vpd"],2),"kPa",f"Média 7d: <strong>{br(ag['vpd_7d'],2)}</strong>"),
-          ("Temperatura",f"{br(o['tmax'])}° {br(o['tmin'])}°","máx / mín °C",f"Status: <strong>{o['status'] or '—'}</strong>"),
-          ("Radiação",br(o["rad"],1),"MJ/m²/dia","Estação INMET A545"),
-          ("Vento",round((o["vento"] or 0)*3.6),"km/h","médio do dia")]
+    est_tag=' <em style="font-weight:400;font-size:10px;color:#b07a1e">(estimado)</em>' if ontem_estimado else ""
+    fonte_rad="Estimativa Open-Meteo" if ontem_estimado else "Estação INMET A545"
+    metr=[("ET₀ ontem",br(o["et0"],2),f"mm/dia{est_tag}",f"7d: <strong>{br(ag['et0_7d'])}</strong> · 30d: <strong>{br(ag['et0_30d'])}</strong> mm"),
+          ("VPD ontem",br(o["vpd"],2),f"kPa{est_tag}",f"Média 7d: <strong>{br(ag['vpd_7d'],2)}</strong>"),
+          ("Temperatura",f"{br(o['tmax'])}° {br(o['tmin'])}°",f"máx / mín °C{est_tag}",f"Status: <strong>{o['status'] or '—'}</strong>"),
+          ("Radiação",br(o["rad"],1),f"MJ/m²/dia{est_tag}",fonte_rad),
+          ("Vento",round((o["vento"] or 0)*3.6),f"km/h{est_tag}","médio do dia")]
     mh="".join(f'<div class="ac-metric"><div class="ac-metric-label">{n}</div><div class="ac-metric-valor" style="font-size:20px">{v}</div><div class="ac-metric-unit">{u}</div><div class="ac-metric-acum">{a}</div></div>' for n,v,u,a in metr)
     ph="".join(f'<div class="ac-prev-card"><div class="ac-prev-dia">{p["label"]}</div><div class="ac-prev-ic">{p["ic"]}</div><div class="ac-prev-temp"><span class="tmax">{p["tmax"]}°</span> <span class="tmin">{p["tmin"]}°</span></div><div class="ac-prev-chuva">{p["chuva"]}% chuva</div></div>' for p in prev) or '<div style="color:#65766b">previsão indisponível</div>'
     mx=max([p["n"] for p in ag["pressao"]]+[1])
@@ -270,14 +334,25 @@ def montar_html(ag, prev, ia, ps, b64):
     pb="".join(f'<div class="ac-pb"><div class="ac-pb-val">{p["n"]}h</div><div class="ac-pb-bar" style="height:{max(5,int(p["n"]/mx*100))}%;--c:{cor_dev(p["dev"])}"></div><div class="ac-pb-lb">{p["mes"].capitalize()}</div><div class="ac-pb-norm">méd {p["norm"]}h</div></div>' for p in ag["pressao"])
     r15=ag["risco15"]; cor15={"alto":"#d9534f","moderado":"#e8a33d","baixo":"#7ec98e"}[r15]
     txt15={"alto":"Risco de mancha foliar ELEVADO","moderado":"Risco de mancha foliar MODERADO","baixo":"Risco de mancha foliar BAIXO"}[r15]
-    molh15_html=f'<div class="ac-molh15" style="--c:{cor15}"><span class="ac-molh15-dot"></span><strong>{txt15}</strong> nos últimos 15 dias — {ag["molh15"]} h de molhamento foliar (UR≥90%).</div>'
+    nota_est=f' <em style="font-size:11px">({fb["molh_est_h"]} h estimadas — Plano B)</em>' if fb.get("molh_est_h") else ""
+    molh15_html=f'<div class="ac-molh15" style="--c:{cor15}"><span class="ac-molh15-dot"></span><strong>{txt15}</strong> nos últimos 15 dias — {ag["molh15"]} h de molhamento foliar (UR≥90%).{nota_est}</div>'
     preventiva=('<div class="ac-pressao-txt">🍌 Cachos em formação agora sob maior pressão de mancha — o sintoma costuma aparecer ~60–70 dias depois. <strong>Acompanhe.</strong></div>' if r15=="alto" else "")
     cult={c["cultura"]:c for c in ia["culturas"]}
     cards="".join(card_cultura(cult[k]) for k in ["banana","uva","citros","cacau"] if k in cult)
+    fonte_ontem=("⚠ estimativa Open-Meteo (estação indisponível)" if ontem_estimado
+                 else "estação INMET A545 (real)")
+    metodo_fb=('<p><strong>Plano B (estação indisponível):</strong> se a estação falhar, o dia entra como '
+               '<em>estimativa</em> do Open-Meteo, sempre marcada — molhamento com limiar calibrado '
+               '(UR_modelo≥76% ≡ UR_estação≥90%) e alerta de frio com Tmín_modelo&lt;16 °C (≡ Tmín_estação&lt;13 °C), '
+               'calibrados contra 76 dias reais da estação. O dado real substitui a estimativa automaticamente '
+               'quando a estação volta.'
+               + (f' Dias recentes estimados: {", ".join(d.strftime("%d/%m") for d in fb["datas"])}.' if fb.get("datas") else " Nenhum dia estimado em uso no momento.")
+               + '</p>')
     tpl=(RAIZ/"template"/"painel.html").read_text(encoding="utf-8")
     rep={"«FAIXA»":faixa_patrocinadores(ps,b64),"«DATA»":ag["data_br"],
          "«RISCO_CLASSE»":nivel_classe,"«RISCO_NIVEL»":ia["risco_nivel"],"«RISCO_FRASE»":ia["risco_frase"],
          "«METRICAS»":mh,"«PREVISAO»":ph,"«PRESSAO»":pb,"«MOLH15»":molh15_html,"«PREVENTIVA»":preventiva,"«CULTURAS»":cards,
+         "«FONTE_ONTEM»":fonte_ontem,"«AVISO_FALLBACK»":aviso_fallback_html(fb, o["data"]),"«METODO_FALLBACK»":metodo_fb,
          "«CHUVA30»":br(ag["chuva_30d"]),"«DIASCHUVA»":str(ag["dias_chuva_30d"])}
     for k,v in rep.items(): tpl=tpl.replace(k,str(v))
     return tpl
@@ -308,13 +383,28 @@ def abrir_issue(titulo, corpo):
 def main():
     log(f"Modo: {'DRY-RUN' if DRY else 'PUBLICAR'}")
     dados=ler_clima()
+    # Plano B: dias faltantes (estação falhou) viram estimativa Open-Meteo MARCADA.
+    # "Hoje" no fuso da fazenda (UTC-3, Brasil sem horário de verão) — o Actions roda em UTC.
+    hoje_sp=(datetime.datetime.utcnow()-datetime.timedelta(hours=3)).date()
+    dados,fb=aplicar_fallback(dados,hoje_sp)
     ag=agregar(dados)
-    log(f"Clima ok — ontem {ag['data_br']} (ET0 {ag['ontem']['et0']})")
-    # checagem de frescor: dado de ontem deve ser recente
-    atraso=(datetime.date.today()-ag["ontem"]["data"]).days
+    ag["fb"]=fb
+    fonte_ontem="estimado (Open-Meteo)" if ag["ontem"].get("estimado") else "estação"
+    log(f"Clima ok — ontem {ag['data_br']} (ET0 {ag['ontem']['et0']}, fonte: {fonte_ontem})")
+    # alerta de estação fora por 48h+ (2+ dias consecutivos em fallback): Issue no dia da 2ª falha
+    if fb["consec"]==2:
+        abrir_issue("Painel: estação INMET A545 fora do ar há 48h",
+            f"Dois dias consecutivos sem dado da estação (fallback Open-Meteo em uso): "
+            f"{', '.join(d.strftime('%d/%m') for d in fb['datas'])}. Verificar estação/coletor.")
+    # falha dupla: nem estação nem estimativa
+    if fb["sem_dado"]:
+        abrir_issue("Painel: dia SEM DADO (estação e Open-Meteo indisponíveis)",
+            f"Dia(s) sem nenhum dado: {', '.join(d.strftime('%d/%m') for d in fb['sem_dado'])}.")
+    # checagem de frescor: dado de ontem deve ser recente (mesmo com fallback)
+    atraso=(hoje_sp-ag["ontem"]["data"]).days
     if atraso>2:
         abrir_issue("Painel: dado do INMET atrasado",
-            f"Último dia na planilha: {ag['data_br']} ({atraso} dias atrás). Painel gerado com o último disponível.")
+            f"Último dia disponível: {ag['data_br']} ({atraso} dias atrás). Painel gerado com o último disponível.")
     prev=previsao(); log(f"Previsão: {len(prev)} dias")
     base=carregar_base()
     ia=analisar(ag,base); log(f"IA: risco {ia['risco_nivel']}, {len(ia['culturas'])} culturas")
@@ -328,7 +418,11 @@ def main():
     if not DRY:
         code=publicar(html); status=f"publicado {code}"; log(f"WordPress: {code}")
     gravar_log({"data":ag["data_iso"],"risco":ia["risco_nivel"],"previsao_dias":len(prev),
-                "patrocinadores":len(ps),"status":status,"executado":datetime.datetime.utcnow().isoformat()})
+                "patrocinadores":len(ps),"status":status,
+                "fonte_ontem":fonte_ontem,
+                "fallback_datas":[d.isoformat() for d in fb["datas"]],
+                "sem_dado":[d.isoformat() for d in fb["sem_dado"]],
+                "executado":datetime.datetime.utcnow().isoformat()})
 
 if __name__=="__main__":
     try: main()
