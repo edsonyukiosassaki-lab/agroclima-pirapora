@@ -23,9 +23,10 @@ IA_STUB = {"risco_nivel": "OK", "risco_frase": "Teste do Plano B — texto simul
 
 
 def dados_sinteticos(excluir=()):
-    """20 dias terminando ontem, no formato de ler_clima(). `excluir` = datas removidas."""
+    """30 dias terminando ontem (cobre a janela inteira do fallback), no formato
+    de ler_clima(). `excluir` = datas removidas."""
     out = []
-    for i in range(20, 0, -1):
+    for i in range(30, 0, -1):
         d = HOJE - datetime.timedelta(days=i)
         if d in excluir:
             continue

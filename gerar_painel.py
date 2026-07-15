@@ -99,7 +99,9 @@ def aplicar_fallback(dados, hoje_sp):
     (dados_completos, fb). Nada é gravado em banco/planilha — só nesta execução."""
     ontem = hoje_sp - datetime.timedelta(days=1)
     datas_ok = {x["data"] for x in dados}
-    janela = [ontem - datetime.timedelta(days=i) for i in range(15)]
+    # 30 dias: cobre TODOS os acumulados do painel (molh 15d, ET0/chuva 30d) —
+    # buraco de 16–30 dias atrás também deflacionava o 30d em silêncio.
+    janela = [ontem - datetime.timedelta(days=i) for i in range(30)]
     faltantes = [d for d in janela if d not in datas_ok]
     fb = {"datas": [], "ontem_estimado": False, "sem_dado": [], "molh_est_h": 0, "consec": 0}
     if faltantes:
@@ -375,9 +377,20 @@ def gravar_log(d):
 def abrir_issue(titulo, corpo):
     tok=os.environ.get("GITHUB_TOKEN"); repo=os.environ.get("GITHUB_REPOSITORY")
     if not tok or not repo: return
-    requests.post(f"https://api.github.com/repos/{repo}/issues",
-        headers={"Authorization":f"token {tok}","Accept":"application/vnd.github+json"},
+    h={"Authorization":f"token {tok}","Accept":"application/vnd.github+json"}
+    # Dedup: se já existe issue ABERTA com o mesmo título, não abre outra —
+    # permite alertar todo dia (>=48h) sem virar spam.
+    try:
+        abertas=requests.get(f"https://api.github.com/repos/{repo}/issues?state=open&labels=painel-falha&per_page=50",
+                             headers=h, timeout=30).json()
+        if any(i.get("title")==titulo for i in abertas if isinstance(i, dict)):
+            return
+    except Exception as e:
+        log(f"abrir_issue: checagem de duplicata falhou ({e}) — abrindo mesmo assim")
+    r=requests.post(f"https://api.github.com/repos/{repo}/issues", headers=h,
         data=json.dumps({"title":titulo,"body":corpo,"labels":["painel-falha"]}), timeout=30)
+    if r.status_code >= 300:
+        log(f"abrir_issue: falhou HTTP {r.status_code}")
 
 # ---------- MAIN ----------
 def main():
@@ -391,10 +404,12 @@ def main():
     ag["fb"]=fb
     fonte_ontem="estimado (Open-Meteo)" if ag["ontem"].get("estimado") else "estação"
     log(f"Clima ok — ontem {ag['data_br']} (ET0 {ag['ontem']['et0']}, fonte: {fonte_ontem})")
-    # alerta de estação fora por 48h+ (2+ dias consecutivos em fallback): Issue no dia da 2ª falha
-    if fb["consec"]==2:
-        abrir_issue("Painel: estação INMET A545 fora do ar há 48h",
-            f"Dois dias consecutivos sem dado da estação (fallback Open-Meteo em uso): "
+    # alerta de estação fora por 48h+ (2+ dias consecutivos em fallback).
+    # >=2 (não ==2): se o workflow pular justamente o 2º dia, o alerta ainda sai;
+    # a deduplicação por título aberto em abrir_issue evita spam diário.
+    if fb["consec"]>=2:
+        abrir_issue("Painel: estação INMET A545 fora do ar há 48h+",
+            f"{fb['consec']} dias consecutivos sem dado da estação (fallback Open-Meteo em uso): "
             f"{', '.join(d.strftime('%d/%m') for d in fb['datas'])}. Verificar estação/coletor.")
     # falha dupla: nem estação nem estimativa
     if fb["sem_dado"]:
