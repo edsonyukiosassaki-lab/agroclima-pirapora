@@ -210,9 +210,12 @@ def analisar(ag, base):
         aviso_fb = (f"\nNOTA: {len(fb['datas'])} dia(s) recentes usam estimativa (estação falhou); "
                     f"o acumulado de molhamento inclui {fb['molh_est_h']} h estimadas.\n")
     pres_str = ", ".join(f"{p['mes']}={p['n']}h({'acima' if p['dev']>1.1 else 'abaixo' if p['dev']<0.9 else 'normal'} da media {p['norm']}h)" for p in ag["pressao"])
+    # Campo None (ex.: daily do Open-Meteo na borda do horizonte em dia estimado)
+    # não pode virar "ET0=None mm" no prompt — a IA leria lixo.
+    fv = lambda v: "indisponível" if v is None else v
     ctx = (aviso_fb + f"Pirapora/MG, fruticultura IRRIGADA. Banana é a cultura do produtor; uva/citros/cacau são da região.\n"
-        f"Data: {ag['data_br']}. Ontem: ET0={o['et0']} mm, VPD={o['vpd']} kPa, Tmax={o['tmax']}°C, "
-        f"Tmin={o['tmin']}°C, radiação={o['rad']} MJ, vento={o['vento']} m/s, chuva={o['chuva']} mm.\n"
+        f"Data: {ag['data_br']}. Ontem: ET0={fv(o['et0'])} mm, VPD={fv(o['vpd'])} kPa, Tmax={fv(o['tmax'])}°C, "
+        f"Tmin={fv(o['tmin'])}°C, radiação={fv(o['rad'])} MJ, vento={fv(o['vento'])} m/s, chuva={fv(o['chuva'])} mm.\n"
         f"Acumulados: ET0 7d={ag['et0_7d']} mm, 30d={ag['et0_30d']} mm; VPD médio 7d={ag['vpd_7d']} kPa; "
         f"chuva 30d={ag['chuva_30d']} mm em {ag['dias_chuva_30d']} dias; menor Tmin 7d={ag['tmin_7d_min']}°C.\n"
         f"MOLHAMENTO FOLIAR (orvalho, HORAS reais com UR≥90% medidas na estação) — é o DRIVER dos fungos de mancha, NÃO a chuva:\n"
