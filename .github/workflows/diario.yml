@@ -44,3 +44,14 @@ jobs:
           git add logs/ saida/ 2>/dev/null || true
           git commit -m "log execução $(date -u +%Y-%m-%dT%H:%MZ)" 2>/dev/null || echo "nada a commitar"
           git push 2>/dev/null || true
+
+      - name: Issue em caso de falha
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXISTE=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "Painel AgroClima FALHOU" --json number -q 'length')
+          if [ "$EXISTE" != "0" ]; then echo "Issue de falha já aberta — não duplicar."; exit 0; fi
+          gh issue create -R "$GITHUB_REPOSITORY" \
+            --title "Painel AgroClima FALHOU ($(date +%d/%m/%Y))" \
+            --body "$(printf 'A geração diária do painel AgroClima falhou — o site continua mostrando a última versão publicada.\n\n**O que fazer (nesta ordem):**\n1. Actions → **diario** → Run workflow (rerodar resolve a maioria).\n2. Se falhar de novo, INMET/Open-Meteo podem estar fora do ar — espere 1h e rerode.\n3. Persistindo, acione o Claude com o link desta Issue.\n\nLogs: %s/%s/actions/runs/%s' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
