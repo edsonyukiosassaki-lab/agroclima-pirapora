@@ -1,0 +1,13 @@
+{
+  "data": "2026-07-22",
+  "risco": "ATENÇÃO",
+  "previsao_dias": 5,
+  "patrocinadores": 2,
+  "status": "publicado 200",
+  "fonte_ontem": "estimado (Open-Meteo)",
+  "fallback_datas": [
+    "2026-07-22"
+  ],
+  "sem_dado": [],
+  "executado": "2026-07-23T11:00:49.010415"
+}
