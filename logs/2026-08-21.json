@@ -5,9 +5,7 @@
   "patrocinadores": 2,
   "status": "publicado 200",
   "fonte_ontem": "estação",
-  "fallback_datas": [
-    "2026-08-19"
-  ],
+  "fallback_datas": [],
   "sem_dado": [],
-  "executado": "2026-08-21T09:26:23.801544"
+  "executado": "2026-08-21T10:47:37.084210"
 }
